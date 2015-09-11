@@ -11,7 +11,7 @@ import ucar.unidata.io.RandomAccessFile;
  * 
  * No 2
  */
-public class SiteConfig {
+public class SiteConfiguration implements CinradXHeaderBuilder {
 
 	/*
 	 * NO 01; TYPE CHAR*8; UNIT N/A; RANGE ASCII; Site Code in characters;
@@ -64,7 +64,7 @@ public class SiteConfig {
 	 */
 	private byte[] reserved;
 
-	public SiteConfig() {
+	public SiteConfiguration() {
 
 	}
 
@@ -114,22 +114,51 @@ public class SiteConfig {
 	/*
 	 * if pos<0,do not seek.
 	 */
-	public void rebuild(RandomAccessFile file, long pos) throws IOException {
+	@Override
+	public void builder(RandomAccessFile file, long pos) throws IOException {
 		if (pos >= 0)
 			file.seek(pos);
-
+		/*
+		 * NO 01; TYPE CHAR*8; UNIT N/A; RANGE ASCII; Site Code in characters;
+		 */
 		siteCode = file.readString(8).trim();
+		/*
+		 * NO 02; TYPE CHAR*32; UNIT N/A; RANGE ASCII; Site Name or description
+		 * in characters;
+		 */
 		siteName = file.readString(32).trim();
-		
+		/*
+		 * NO 03; TYPE FLOAT; UNIT Degree; RANGE -90.0 to 90.0; Latitude of
+		 * Radar Site;
+		 */
 		latitude = file.readFloat();
+		/*
+		 * NO 04; TYPE FLOAT; UNIT Degree; RANGE -180.0 to 180.0; Longitude of
+		 * Radar Site;
+		 */
 		longitude = file.readFloat();
-
+		/*
+		 * NO 05; TYPE INT; UNIT Meters; RANGE 0 to 65536; Height of antenna in
+		 * meters;
+		 */
 		height = file.readInt();
+		/*
+		 * NO 06; TYPE INT; UNIT Meters; RANGE 0 to 65536; Height of ground in
+		 * meters;
+		 */
 		ground = file.readInt();
-
+		/*
+		 * NO 07; TYPE FLOAT; UNIT MHz; RANGE 1.0 to 999,000.0; Radar operation
+		 * frequency in MHz;
+		 */
 		frequency = file.readFloat();
+		/*
+		 * NO 08; TYPE FLOAT; UNIT Degree; RANGE 0.1 to 2.0; Antenna Beam Width;
+		 */
 		beamWidth = file.readFloat();
-		
+		/*
+		 * NO 09; reserved Range 64 Bytes;
+		 */
 		reserved = file.readBytes(64);
 	}
 

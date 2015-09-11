@@ -11,15 +11,15 @@ import ucar.unidata.io.RandomAccessFile;
  * 
  * No 1
  */
-public class GenericHeader {
+public class GenericHeader implements CinradXHeaderBuilder{
 
 	/*
-	 * Magic word for product Range 0x4D545352 No 1
+	 * Magic word for product; Range 0x4D545352; No 1
 	 */
 	private int magicWord;
 
 	/*
-	 * Major Version Range 0 to 65536 No 2
+	 * Major Version; Range 0 to 65536; No 2
 	 */
 	private short majorVersion;
 
@@ -29,17 +29,17 @@ public class GenericHeader {
 	private short minorVersion;
 
 	/*
-	 * Type of data, see Table 2-3 Range 2 No 4
+	 * Type of data, see Table 2-3; Range 2; No 4
 	 */
 	private int genericType;
 
 	/*
-	 * Type of Product, see Table 3-3 Range 1 to 100 No 5
+	 * Type of Product, see Table 3-3; Range 1 to 100 ;No 5
 	 */
 	private int productType;
 
 	/*
-	 * reserved Range 16 Bytes No 6
+	 * reserved; Range 16 Bytes ;No 6
 	 */
 	private byte[] reserved;
 
@@ -81,20 +81,33 @@ public class GenericHeader {
 	/*
 	 * if pos<0,do not seek.
 	 */
-	public void rebuild(RandomAccessFile file, long pos) throws IOException {
+	@Override
+	public void builder(RandomAccessFile file, long pos) throws IOException {
 		if (pos >= 0)
 			file.seek(pos);
-		
+		/*
+		 * Magic word for product; Range 0x4D545352; No 1
+		 */
 		magicWord=file.readInt();
-		
+		/*
+		 * Major Version; Range 0 to 65536; No 2
+		 */
 		majorVersion=file.readShort();
-		
+		/*
+		 * Minor Version Range 0 to 65536 No 3
+		 */
 		minorVersion=file.readShort();
-		
+		/*
+		 * Type of data, see Table 2-3; Range 2; No 4
+		 */
 		genericType=file.readInt();
-		
+		/*
+		 * Type of Product, see Table 3-3; Range 1 to 100 ;No 5
+		 */
 		productType=file.readInt();
-		
+		/*
+		 * reserved; Range 16 Bytes ;No 6
+		 */
 		reserved=file.readBytes(16);
 
 	};

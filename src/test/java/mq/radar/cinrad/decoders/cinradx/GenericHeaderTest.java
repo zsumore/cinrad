@@ -38,7 +38,7 @@ public class GenericHeaderTest {
 	@Test
 	public void testRebuildPPI() throws IOException {
 		GenericHeader genericHeader=new GenericHeader();
-		genericHeader.rebuild(file1, 0);
+		genericHeader.builder(file1, 0);
 		System.out.println(genericHeader);
 		
 		assertTrue(genericHeader.getMajorVersion()==1);
@@ -50,7 +50,7 @@ public class GenericHeaderTest {
 	@Test
 	public void testRebuildCAPPI() throws IOException {
 		GenericHeader genericHeader=new GenericHeader();
-		genericHeader.rebuild(file3, 0);
+		genericHeader.builder(file3, 0);
 		System.out.println(genericHeader);
 		
 		assertTrue(genericHeader.getMajorVersion()==1);

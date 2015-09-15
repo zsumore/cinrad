@@ -4,6 +4,6 @@ import java.io.IOException;
 
 import ucar.unidata.io.RandomAccessFile;
 
-public interface CinradXHeaderBuilder {
+public interface ICinradXHeaderBuilder {
 	void builder(RandomAccessFile file, long pos) throws IOException;
 }

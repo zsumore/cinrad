@@ -1,33 +1,46 @@
 package mq.radar.cinrad.decoders.cinradx.productparams;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import mq.radar.cinrad.decoders.cinradx.ProductType;
-import ucar.unidata.io.InMemoryRandomAccessFile;
 
-public interface ProductDependentParameter {
+/*
+ * Product Dependent Parameters Block contains all product related parameters. Different products
+ * have different set of parameters.
+ * Notice that the number of parameters for different products can be different. But the length of the
+ * block is fixed to 64 bytes. If the parameters can not fill up the block, blanks are used to fill up the
+ * spare.
+ */
+public class ProductDependentParameter implements IProductDependentParameter {
 
-	ProductType getProductType();
+	ProductType productType;
 
-	Object[] getProductParamValues();
+	Object[] productParamValues;
 
-	default void buildProductParameter(byte[] paramBytes) throws IOException {
-		if (null != getProductParamValues() && getProductParamValues().length == getProductType().getParamSize()) {
-
-			InMemoryRandomAccessFile dataInputStream = new InMemoryRandomAccessFile("Cinrad-X Product Params",
-					paramBytes);
-			dataInputStream.seek(0);
-
-			int size = getProductType().getParamSize();
-
-			for (int i = 0; i < size; i++) {
-				getProductParamValues()[i] = ParamUtils.buildParamValue(dataInputStream,
-						getProductType().getParamTypes()[i]);
-			}
-			dataInputStream.flush();
-			dataInputStream.close();
-		}
-
+	public ProductDependentParameter(ProductType type,byte[] paramBytes) throws IOException {
+		this.productType = type;
+		this.productParamValues = new Object[type.getParamSize()];
+		buildProductParameter(paramBytes);
 	}
+
+	@Override
+	public ProductType getProductType() {
+
+		return productType;
+	}
+
+	@Override
+	public Object[] getProductParamValues() {
+
+		return productParamValues;
+	}
+
+	@Override
+	public String toString() {
+		return "ProductDependentParameter [productType=" + productType + ", productParamValues="
+				+ Arrays.toString(productParamValues) + "]";
+	}
+	
 
 }

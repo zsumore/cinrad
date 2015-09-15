@@ -11,7 +11,7 @@ import ucar.unidata.io.RandomAccessFile;
  * 
  * No 2
  */
-public class SiteConfiguration implements CinradXHeaderBuilder {
+public class SiteConfiguration implements ICinradXHeaderBuilder {
 
 	/*
 	 * NO 01; TYPE CHAR*8; UNIT N/A; RANGE ASCII; Site Code in characters;

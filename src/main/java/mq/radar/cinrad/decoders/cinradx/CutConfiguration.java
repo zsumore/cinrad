@@ -10,7 +10,7 @@ import ucar.unidata.io.RandomAccessFile;
  * Range 256 Bytes;
  * No 4;
  */
-public class CutConfiguration implements CinradXHeaderBuilder {
+public class CutConfiguration implements ICinradXHeaderBuilder {
 
 	/*
 	 * NO 01; TYPE INT; UNIT N/A; RANGE 1 to 2; Main processing mode of signal

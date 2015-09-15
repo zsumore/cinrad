@@ -10,12 +10,12 @@ import ucar.unidata.io.RandomAccessFile;
  * Range 128 Bytes;
  * No 5;
  */
-public class ProductHeader implements CinradXHeaderBuilder {
+public class ProductHeader implements ICinradXHeaderBuilder {
 
 	/*
 	 * NO 01; TYPE INT; UNIT N/A; RANGE 1 to 100; Product type, See Table 3-3
 	 */
-	private int productType;
+	private int productNumber;
 
 	/*
 	 * NO 02; TYPE CHAR*32; UNIT N/A; RANGE ASCII; User defined name of product
@@ -71,15 +71,15 @@ public class ProductHeader implements CinradXHeaderBuilder {
 
 	@Override
 	public String toString() {
-		return "ProductHeader [productType=" + productType + ", productName=" + productName + ", productGenerationTime="
+		return "ProductHeader [productType=" + productNumber + ", productName=" + productName + ", productGenerationTime="
 				+ productGenerationTime + ", volumeStartTime=" + volumeStartTime + ", dataStartTime=" + dataStartTime
 				+ ", dataEndTime=" + dataEndTime + ", projectionType=" + projectionType + ", primaryMomentType="
 				+ primaryMomentType + ", secondaryMomentType=" + secondaryMomentType + ", reserved="
 				+ Arrays.toString(reserved) + "]";
 	}
 
-	public int getProductType() {
-		return productType;
+	public int getProductNumber() {
+		return productNumber;
 	}
 
 	public String getProductName() {
@@ -127,7 +127,7 @@ public class ProductHeader implements CinradXHeaderBuilder {
 		 * NO 01; TYPE INT; UNIT N/A; RANGE 1 to 100; Product type, See Table
 		 * 3-3
 		 */
-		productType = file.readInt();
+		productNumber = file.readInt();
 
 		/*
 		 * NO 02; TYPE CHAR*32; UNIT N/A; RANGE ASCII; User defined name of

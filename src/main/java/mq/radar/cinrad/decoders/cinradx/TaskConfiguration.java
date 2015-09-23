@@ -10,7 +10,7 @@ import ucar.unidata.io.RandomAccessFile;
  * Range 256 Bytes;
  * No 3;
  */
-public class TaskConfiguration implements ICinradXHeaderBuilder {
+public class TaskConfiguration implements ICinradXBuilder {
 
 	/*
 	 * NO 01; TYPE CHAR*32; UNIT N/A; RANGE ASCII; Name of the Task

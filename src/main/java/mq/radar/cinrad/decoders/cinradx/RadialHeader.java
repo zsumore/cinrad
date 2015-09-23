@@ -18,7 +18,7 @@ import ucar.unidata.io.RandomAccessFile;
  * Radial Header Block is described in Table 4-2. And Radial Data is described in Table 4-3.
  * 
  */
-public class RadialHeader implements ICinradXHeaderBuilder {
+public class RadialHeader implements ICinradXBuilder {
 
 	/*
 	 * NO 01; TYPE INT; UNIT N/A; RANGE 1 to 64 ;Moment data type, See Table2-7;

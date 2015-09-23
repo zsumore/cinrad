@@ -11,7 +11,7 @@ import ucar.unidata.io.RandomAccessFile;
  * 
  * No 1
  */
-public class GenericHeader implements ICinradXHeaderBuilder{
+public class GenericHeader implements ICinradXBuilder{
 
 	/*
 	 * Magic word for product; Range 0x4D545352; No 1

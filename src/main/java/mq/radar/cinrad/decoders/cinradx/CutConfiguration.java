@@ -10,7 +10,7 @@ import ucar.unidata.io.RandomAccessFile;
  * Range 256 Bytes;
  * No 4;
  */
-public class CutConfiguration implements ICinradXHeaderBuilder {
+public class CutConfiguration implements ICinradXBuilder {
 
 	/*
 	 * NO 01; TYPE INT; UNIT N/A; RANGE 1 to 2; Main processing mode of signal
@@ -459,6 +459,7 @@ public class CutConfiguration implements ICinradXHeaderBuilder {
 		if (pos >= 0)
 			file.seek(pos);
 
+		
 		/*
 		 * NO 01; TYPE INT; UNIT N/A; RANGE 1 to 2; Main processing mode of
 		 * signal processing algorithm. 1 - PPP 2 - FFT
@@ -699,6 +700,8 @@ public class CutConfiguration implements ICinradXHeaderBuilder {
 		 * NO 45; TYPE 71 Bytes; UNIT N/A ; RANGE N/A ;
 		 */
 		spare = file.readBytes(71);
+		
+		
 
 	}
 }

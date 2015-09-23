@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import mq.radar.cinrad.decoders.cinradx.ProductType;
-import mq.radar.cinrad.decoders.cinradx.ProductUtils;
+import mq.radar.cinrad.decoders.cinradx.CinradXUtils;
 import ucar.unidata.io.InMemoryRandomAccessFile;
 
 public class VWPParameter implements IProductDependentParameter {
@@ -53,7 +53,7 @@ public class VWPParameter implements IProductDependentParameter {
 					paramBytes);
 			dataInputStream.seek(0);
 
-			getProductParamValues()[0] = ProductUtils.buildProductParamValue(dataInputStream,
+			getProductParamValues()[0] = CinradXUtils.buildProductParamValue(dataInputStream,
 					getProductType().getParamTypes()[0]);
 
 			int heightN = (int) getProductParamValues()[0];
@@ -61,7 +61,7 @@ public class VWPParameter implements IProductDependentParameter {
 			if (heightN > 0 && heightN <= 30) {
 				heightArray = new Short[heightN];
 				for (int i = 0; i < heightN; i++) {
-					heightArray[i] = (Short) ProductUtils.buildProductParamValue(dataInputStream,
+					heightArray[i] = (Short) CinradXUtils.buildProductParamValue(dataInputStream,
 							getProductType().getParamTypes()[1]);
 				}
 			} else {

@@ -6,8 +6,11 @@ import java.util.Map;
 
 import ucar.unidata.io.InMemoryRandomAccessFile;
 
-public class ProductUtils {
+public class CinradXUtils {
 	private static Map<Integer,ProductType> productMap;
+	
+	final public static String AUTO_DECODE_CONFIG_FILE = "decode.properties";
+	final public static String DEFAULT_DECODE_CONFIG_FILE = "mq/radar/cinrad/decoders/cinradx/decode.properties";
 	
 	public static ProductType getProductType(int number){
 		if(null==productMap){

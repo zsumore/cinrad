@@ -1,4 +1,4 @@
-package mq.radar.cinrad.decoders.cinradx.productparams;
+package mq.radar.cinrad.decoders.cinradx;
 
 import static org.junit.Assert.*;
 
@@ -8,13 +8,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import mq.radar.cinrad.decoders.cinradx.CutConfiguration;
-import mq.radar.cinrad.decoders.cinradx.ProductHeader;
-import mq.radar.cinrad.decoders.cinradx.CinradXUtils;
-import mq.radar.cinrad.decoders.cinradx.TaskConfiguration;
+import mq.radar.cinrad.decoders.cinradx.productparams.ProductDependentParameter;
 import ucar.unidata.io.RandomAccessFile;
 
-public class ProductDependentParameterTest {
+public class RadialDataTest {
 
 	String dbz = "data/cinradx/ppi/dBZ/FSNH_20150830000024Z_PPI_01_dBZ";
 
@@ -62,6 +59,20 @@ public class ProductDependentParameterTest {
 		// productDependentParameter.buildProductParameter(dbzFile.readBytes(64));
 		System.out.println(productDependentParameter.getProductType());
 		System.out.println(productDependentParameter);
+
+		RadialHeader radialHeader = new RadialHeader();
+		radialHeader.builder(dbzFile, -1);
+
+		System.out.println(radialHeader);
+
+		for (int j = 0; j < radialHeader.getNumberOfRadials(); j++) {
+
+			RadialData radialData = new RadialData(radialHeader);
+			radialData.builder(dbzFile, -1);
+			//if(j==0)
+			System.out.println(radialData);
+		}
+		
 
 	}
 

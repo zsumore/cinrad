@@ -54,7 +54,7 @@ public class RadialHeaderTest {
 		assertTrue(productHeader.getProductNumber() == 1);
 
 		ProductDependentParameter productDependentParameter = new ProductDependentParameter(
-				ProductUtils.getProductType(productHeader.getProductNumber()), dbzFile.readBytes(64));
+				CinradXUtils.getProductType(productHeader.getProductNumber()), dbzFile.readBytes(64));
 		assertTrue(productDependentParameter.getProductType().name().equalsIgnoreCase("PPI"));
 		// productDependentParameter.buildProductParameter(dbzFile.readBytes(64));
 		System.out.println(productDependentParameter.getProductType());

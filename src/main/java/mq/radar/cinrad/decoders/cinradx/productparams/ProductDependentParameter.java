@@ -18,7 +18,7 @@ public class ProductDependentParameter implements IProductDependentParameter {
 
 	Object[] productParamValues;
 
-	public ProductDependentParameter(ProductType type,byte[] paramBytes) throws IOException {
+	public ProductDependentParameter(ProductType type, byte[] paramBytes) throws IOException {
 		this.productType = type;
 		this.productParamValues = new Object[type.getParamSize()];
 		buildProductParameter(paramBytes);
@@ -41,6 +41,5 @@ public class ProductDependentParameter implements IProductDependentParameter {
 		return "ProductDependentParameter [productType=" + productType + ", productParamValues="
 				+ Arrays.toString(productParamValues) + "]";
 	}
-	
 
 }

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import mq.radar.cinrad.decoders.cinradx.ProductType;
-import mq.radar.cinrad.decoders.cinradx.ProductUtils;
+import mq.radar.cinrad.decoders.cinradx.CinradXUtils;
 import ucar.unidata.io.InMemoryRandomAccessFile;
 
 public class USERParameter implements IProductDependentParameter {
@@ -53,13 +53,13 @@ public class USERParameter implements IProductDependentParameter {
 			dataInputStream.seek(0);
 
 			for (int i = 0; i < algorithmArray.length; i++) {
-				algorithmArray[i] = (Integer) ProductUtils.buildProductParamValue(dataInputStream,
+				algorithmArray[i] = (Integer) CinradXUtils.buildProductParamValue(dataInputStream,
 						getProductType().getParamTypes()[0]);
 			}
 
 			getProductParamValues()[0] = algorithmArray[0];
 			for (int j = 1; j < getProductParamValues().length; j++) {
-				getProductParamValues()[j] = ProductUtils.buildProductParamValue(dataInputStream,
+				getProductParamValues()[j] = CinradXUtils.buildProductParamValue(dataInputStream,
 						getProductType().getParamTypes()[j]);
 			}
 

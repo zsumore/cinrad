@@ -10,7 +10,7 @@ import ucar.unidata.io.RandomAccessFile;
  * Range 128 Bytes;
  * No 5;
  */
-public class ProductHeader implements ICinradXHeaderBuilder {
+public class ProductHeader implements ICinradXBuilder {
 
 	/*
 	 * NO 01; TYPE INT; UNIT N/A; RANGE 1 to 100; Product type, See Table 3-3

@@ -13,7 +13,7 @@ import ucar.unidata.io.RandomAccessFile;
 
 public class RadialDataTest {
 
-	String dbz = "data/cinradx/ppi/dBZ/FSNH_20150830000024Z_PPI_01_dBZ";
+	String dbz = "data/cinradx/ppi/dBZ/FSNH_20150830000024Z_PPI_08_dBZ";
 
 	String cappi = "data/cinradx/cappi/FSNH_20150831000348Z_CAPPI_00_default";
 

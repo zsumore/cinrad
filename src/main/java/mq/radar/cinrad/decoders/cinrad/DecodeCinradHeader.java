@@ -21,8 +21,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
 public class DecodeCinradHeader implements CinradHeader {
-	private final Logger logger = LoggerFactory
-			.getLogger(DecodeCinradHeader.class);
+	private final Logger logger = LoggerFactory.getLogger(DecodeCinradHeader.class);
 
 	private boolean validFile = false;
 	private String fileName = "";
@@ -164,12 +163,10 @@ public class DecodeCinradHeader implements CinradHeader {
 		ucar.unidata.io.RandomAccessFile raf = null;
 		try {
 			if (url.getProtocol().equals("file")) {
-				raf = new ucar.unidata.io.RandomAccessFile(url.getFile()
-						.replaceAll("%20", " "), "r");
+				raf = new ucar.unidata.io.RandomAccessFile(url.getFile().replaceAll("%20", " "), "r");
 
 			} else {
-				raf = new ucar.unidata.io.http.HTTPRandomAccessFile(
-						url.toString());
+				raf = new ucar.unidata.io.http.HTTPRandomAccessFile(url.toString());
 
 			}
 			raf.order(ucar.unidata.io.RandomAccessFile.BIG_ENDIAN);
@@ -184,8 +181,7 @@ public class DecodeCinradHeader implements CinradHeader {
 
 	}
 
-	void decodeHeader(ucar.unidata.io.RandomAccessFile raf)
-			throws DecodeException {
+	void decodeHeader(ucar.unidata.io.RandomAccessFile raf) throws DecodeException {
 
 		String header = null;
 		int wmoStart = -1;
@@ -201,8 +197,7 @@ public class DecodeCinradHeader implements CinradHeader {
 			// close file - we will now use in-memory data
 			raf.close();
 
-			f = new ucar.unidata.io.InMemoryRandomAccessFile("Cinrad DATA",
-					data);
+			f = new ucar.unidata.io.InMemoryRandomAccessFile("Cinrad DATA", data);
 			f.order(ucar.unidata.io.RandomAccessFile.BIG_ENDIAN);
 			f.seek(0); // rewind
 
@@ -234,8 +229,7 @@ public class DecodeCinradHeader implements CinradHeader {
 					;
 				}
 
-				logger.info("--FIRST BREAKPOINT-- FILE POINTER LOCATION ={}",
-						f.getFilePointer());
+				logger.info("--FIRST BREAKPOINT-- FILE POINTER LOCATION ={}", f.getFilePointer());
 
 				// Decode Lat and Lon
 				lat = f.readInt() / 1000.0;
@@ -279,11 +273,22 @@ public class DecodeCinradHeader implements CinradHeader {
 				// The following will process the data threshold values, which
 				// are
 				// applicable for all products but the 8-bit ones
-				InMemoryRandomAccessFile bf = new InMemoryRandomAccessFile(
-						"Data Threshold", dataThresholdBytes);
+				InMemoryRandomAccessFile bf = new InMemoryRandomAccessFile("Data Threshold", dataThresholdBytes);
 				for (int i = 0; i < 16; i++) {
-					dataThresholdInfo[i] = bf.readUnsignedByte();
-					dataThresholdValue[i] = bf.readUnsignedByte();
+					//TODO
+					if (this.productCode == 19) {
+						dataThresholdInfo[i] = bf.readUnsignedByte() ;
+						dataThresholdValue[i] = bf.readUnsignedByte() ;
+					} else {
+						dataThresholdInfo[i] = bf.readUnsignedByte();
+						dataThresholdValue[i] = bf.readUnsignedByte();
+					};
+					System.out.println(this.productCode);
+					System.out.println("-----------------------------");
+					System.out.println(dataThresholdInfo[i]);
+					System.out.println(dataThresholdValue[i]);
+					System.out.println("-----------------------------");
+					
 				}
 				bf.close();
 
@@ -303,8 +308,7 @@ public class DecodeCinradHeader implements CinradHeader {
 
 				logger.debug("VERSION:{}", version);
 
-				logger.debug("END OF PROD. DESC. BLOCK: FILE POS:{}",
-						f.getFilePointer());
+				logger.debug("END OF PROD. DESC. BLOCK: FILE POS:{}", f.getFilePointer());
 
 				logger.debug("symbologyBlockOffset:{}", symbologyBlockOffset);
 
@@ -348,9 +352,7 @@ public class DecodeCinradHeader implements CinradHeader {
 			logger.error("ERROR DUMP: f-loct={}file-size={}", fploc, fsize);
 
 			if (fploc == fsize) {
-				throw new DecodeException(
-						"Header Decode Error = No Section Separators Found: ",
-						url);
+				throw new DecodeException("Header Decode Error = No Section Separators Found: ", url);
 			}
 
 			logger.error("CAUGHT EXCEPTION: {}", e);
@@ -362,8 +364,7 @@ public class DecodeCinradHeader implements CinradHeader {
 				logger.error("Exception:{}", ee);
 			}
 
-			throw new DecodeException(
-					"Header Decode Error = " + e.getMessage(), url);
+			throw new DecodeException("Header Decode Error = " + e.getMessage(), url);
 
 		}
 
@@ -424,11 +425,9 @@ public class DecodeCinradHeader implements CinradHeader {
 				dataThresholdString[i] = "" + dataThresholdValue[i];
 
 				if (binaryString.charAt(2) == '1') {
-					dataThresholdString[i] = CinradUtils.fmt2
-							.format((double) dataThresholdValue[i] / 20.0);
+					dataThresholdString[i] = CinradUtils.fmt2.format((double) dataThresholdValue[i] / 20.0);
 				} else if (binaryString.charAt(3) == '1') {
-					dataThresholdString[i] = CinradUtils.fmt1
-							.format((double) dataThresholdValue[i] / 10.0);
+					dataThresholdString[i] = CinradUtils.fmt1.format((double) dataThresholdValue[i] / 10.0);
 				} else if (binaryString.charAt(4) == '1') {
 					dataThresholdString[i] = "> " + dataThresholdValue[i];
 				} else if (binaryString.charAt(5) == '1') {
@@ -511,31 +510,21 @@ public class DecodeCinradHeader implements CinradHeader {
 			String breakLine = "\n";
 			StringBuffer buffer = new StringBuffer();
 			buffer.append("Cindar File: ").append(fileName).append(breakLine);
-			buffer.append("Product Code: ").append(productCode)
+			buffer.append("Product Code: ").append(productCode).append(breakLine);
+			buffer.append("Scan Datetime: ").append(CinradUtils.datetime.format(scanCalendar.getTime()))
 					.append(breakLine);
-			buffer.append("Scan Datetime: ")
-					.append(CinradUtils.datetime.format(scanCalendar.getTime()))
+			buffer.append("Radar Station Code: ").append(radarStationCode).append(breakLine);
+			buffer.append("Receive Radar Station Code: ").append(receiveStationCode).append(breakLine);
+			buffer.append("File Size(Byte): ").append(fileSize).append(breakLine);
+			buffer.append("Latitude: ").append(lat).append(";Longitude: ").append(lon).append(";Altitude: ").append(alt)
 					.append(breakLine);
-			buffer.append("Radar Station Code: ").append(radarStationCode)
-					.append(breakLine);
-			buffer.append("Receive Radar Station Code: ")
-					.append(receiveStationCode).append(breakLine);
-			buffer.append("File Size(Byte): ").append(fileSize)
-					.append(breakLine);
-			buffer.append("Latitude: ").append(lat).append(";Longitude: ")
-					.append(lon).append(";Altitude: ").append(alt)
-					.append(breakLine);
-			buffer.append("Operating Mode: ").append(operatingMode)
-					.append(breakLine);
-			buffer.append("RPG Serial Number: ").append(serialNumber)
-					.append(breakLine);
-			buffer.append("Volume Coverage Pattern: ").append(vcp)
-					.append(breakLine);
+			buffer.append("Operating Mode: ").append(operatingMode).append(breakLine);
+			buffer.append("RPG Serial Number: ").append(serialNumber).append(breakLine);
+			buffer.append("Volume Coverage Pattern: ").append(vcp).append(breakLine);
 			buffer.append("Product Specific: ");
 			int size = productSpecific.length;
 			for (int i = 0; i < size; i++) {
-				buffer.append(i).append(":").append(productSpecific[i])
-						.append(",");
+				buffer.append(i).append(":").append(productSpecific[i]).append(",");
 			}
 			buffer.append(breakLine);
 			buffer.append("Elev Number: ").append(elevNumber).append(breakLine);
@@ -543,19 +532,15 @@ public class DecodeCinradHeader implements CinradHeader {
 			buffer.append("Data Level Threshold: ");
 			int size2 = dataThresholdString.length;
 			for (int i = 0; i < size2; i++) {
-				buffer.append(i).append(":").append(dataThresholdString[i])
-						.append(",");
+				buffer.append(i).append(":").append(dataThresholdString[i]).append(",");
 			}
 			buffer.append(breakLine);
 
 			buffer.append("Version: ").append(version).append(breakLine);
 
-			buffer.append("Symbology Block Offset: ")
-					.append(symbologyBlockOffset).append(breakLine);
-			buffer.append("Graphic Block Offset: ").append(graphicBlockOffset)
-					.append(breakLine);
-			buffer.append("Tabular Block Offset: ").append(tabularBlockOffset)
-					.append(breakLine);
+			buffer.append("Symbology Block Offset: ").append(symbologyBlockOffset).append(breakLine);
+			buffer.append("Graphic Block Offset: ").append(graphicBlockOffset).append(breakLine);
+			buffer.append("Tabular Block Offset: ").append(tabularBlockOffset).append(breakLine);
 
 			return buffer.toString();
 		}

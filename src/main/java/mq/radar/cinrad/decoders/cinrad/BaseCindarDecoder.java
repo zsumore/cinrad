@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import mq.radar.cinrad.MQProjections;
 import mq.radar.cinrad.decoders.DecodeException;
 import mq.radar.cinrad.decoders.DecodeHintNotSupportedException;
 import mq.radar.cinrad.decoders.MaxGeographicExtent;

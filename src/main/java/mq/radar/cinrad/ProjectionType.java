@@ -1,0 +1,21 @@
+package mq.radar.cinrad;
+
+public enum ProjectionType {
+	MERCATOR(1), AZIMUTHAL_EQUIDISTANT(2), STEREOGRAPHIC(3), EQUIDISTANT_CYLINDER(4), GNOMONIC(5), LAMBERT_CONIC(
+			6), CASSINI_SOLDNER(7), CYLINDRICAL_EQUAL_AREA(8), EQUIDISTANT_CONIC(9), TRANSVERSE_MERCATOR(
+					10), GALL_STEREOGRAPHIC(11), KROVAK_OBLIQUE_CONIC_CONFORMAL(12), LAMBERT_AZIMUTHAL_EQUAL_AREA(
+							13), MOLLWEIDE(14), ORTHOGRAPHIC(15), ROBINSON(16), SINUSOIDAL(17), VANDERGRINTEN(
+									18), WGS84(90), BEIJING_1954(91);
+
+	private int type;
+
+	private ProjectionType(int type) {
+		this.type = type;
+	}
+
+	public int getType() {
+		return type;
+	}
+	
+
+}

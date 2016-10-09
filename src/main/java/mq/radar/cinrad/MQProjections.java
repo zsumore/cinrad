@@ -1,9 +1,11 @@
-package mq.radar.cinrad.decoders.cinrad;
+package mq.radar.cinrad;
 
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
+
+import mq.radar.cinrad.decoders.cinrad.CinradHeader;
 
 public class MQProjections {
 
@@ -23,10 +25,8 @@ public class MQProjections {
 	public static final String WGS84_WKT = "GEOGCS[\"WGS84\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], "
 			+ "PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\",0.017453292519943295], AXIS[\"Longitude\",EAST], AXIS[\"Latitude\",NORTH]]";
 
-	public final static String WGS84_ESRI_PRJ = "GEOGCS[\"GCS_WGS_1984\","
-			+ "DATUM[\"D_WGS_1984\","
-			+ "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
-			+ "PRIMEM[\"Greenwich\",0.0],"
+	public final static String WGS84_ESRI_PRJ = "GEOGCS[\"GCS_WGS_1984\"," + "DATUM[\"D_WGS_1984\","
+			+ "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]]," + "PRIMEM[\"Greenwich\",0.0],"
 			+ "UNIT[\"Degree\",0.0174532925199433]]";
 
 	/**
@@ -70,14 +70,12 @@ public class MQProjections {
 	// "PROJCS[\"Polar_Stereographic\",GEOGCS[\"Sphere\","+
 	public static final String HRAPSTEREO_WKT = "PROJCS[\"Stereographic_North_Pole\",GEOGCS[\"Sphere\","
 			+ "DATUM[\"Sphere\",SPHEROID[\"Sphere\",6371200.0,0],TOWGS84[0,0,0,0,0,0,0]],"
-			+ "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
-			+ "PROJECTION[\"Polar_Stereographic\"],"
+			+ "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]]," + "PROJECTION[\"Polar_Stereographic\"],"
 			+
 			// "PROJECTION[\"Stereographic_North_Pole\"],"+
 			"PARAMETER[\"false_easting\",0.0],PARAMETER[\"false_northing\",0.0],"
-			+ "PARAMETER[\"central_meridian\",-105.0],"
-			+ "PARAMETER[\"latitude_of_origin\",60.0],UNIT[\"metre\",1.0]]";
-	// "PARAMETER[\"latitude_of_origin\",23.117],UNIT[\"metre\",1.0]]";
+			+ "PARAMETER[\"central_meridian\",-105.0]," + "PARAMETER[\"latitude_of_origin\",60.0],UNIT[\"metre\",1.0]]";
+			// "PARAMETER[\"latitude_of_origin\",23.117],UNIT[\"metre\",1.0]]";
 
 	/*
 	 * public static final String HRAPSTEREO_WKT =
@@ -104,8 +102,7 @@ public class MQProjections {
 			+ "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.017453292519943295]],"
 			+ "PROJECTION[\"Albers_Conic_Equal_Area\"],"
 			+ "PARAMETER[\"false_easting\",0.0],PARAMETER[\"false_northing\",0.0],"
-			+ "PARAMETER[\"central_meridian\",-96.0],"
-			+ "PARAMETER[\"standard_parallel_1\",29.5],"
+			+ "PARAMETER[\"central_meridian\",-96.0]," + "PARAMETER[\"standard_parallel_1\",29.5],"
 			+ "PARAMETER[\"standard_parallel_2\",45.5],"
 			+ "PARAMETER[\"latitude_of_origin\",37.5],UNIT[\"metre\",1.0]]";
 
@@ -116,14 +113,12 @@ public class MQProjections {
 		return projection;
 	}
 
-	public CoordinateReferenceSystem getWGS84CoordinateSystem()
-			throws FactoryException {
+	public CoordinateReferenceSystem getWGS84CoordinateSystem() throws FactoryException {
 
 		return CRS.parseWKT(WGS84_WKT);
 	}
 
-	public CoordinateReferenceSystem getBeijing1954CoordinateSystem()
-			throws FactoryException {
+	public CoordinateReferenceSystem getBeijing1954CoordinateSystem() throws FactoryException {
 
 		return CRS.parseWKT(Beijing1954_WKT);
 	}
@@ -143,8 +138,7 @@ public class MQProjections {
 	 * @return The MathTransform object
 	 */
 
-	public CoordinateReferenceSystem getRadarCoordinateSystem(
-			CinradHeader header) throws FactoryException {
+	public CoordinateReferenceSystem getRadarCoordinateSystem(CinradHeader header) throws FactoryException {
 
 		return getRadarCoordinateSystem(header.getLon(), header.getLat());
 	}
@@ -164,17 +158,14 @@ public class MQProjections {
 	 * @throws FactoryException
 	 */
 	// EPSG:3786 5072 3513
-	public CoordinateReferenceSystem getRadarCoordinateSystem(double lon,
-			double lat) throws FactoryException {
+	public CoordinateReferenceSystem getRadarCoordinateSystem(double lon, double lat) throws FactoryException {
 		String wsrWKT = "PROJCS[\"Albers_Conic_Equal_Area\",GEOGCS[\"NAD83\","
 				+ "DATUM[\"NAD83\",SPHEROID[\"GRS_1980\",6378137.0,298.25722210100002],TOWGS84[0,0,0,0,0,0,0]],"
 				+ "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.017453292519943295]],"
 				+ "PROJECTION[\"Albers_Conic_Equal_Area\"],"
 				+ "PARAMETER[\"false_easting\",0.0],PARAMETER[\"false_northing\",0.0],"
-				+ "PARAMETER[\"central_meridian\"," + lon
-				+ "],PARAMETER[\"standard_parallel_1\"," + (lat - 1.0)
-				+ "],PARAMETER[\"standard_parallel_2\"," + (lat + 1.0)
-				+ "],PARAMETER[\"latitude_of_origin\"," + lat
+				+ "PARAMETER[\"central_meridian\"," + lon + "],PARAMETER[\"standard_parallel_1\"," + (lat - 1.0)
+				+ "],PARAMETER[\"standard_parallel_2\"," + (lat + 1.0) + "],PARAMETER[\"latitude_of_origin\"," + lat
 				+ "],UNIT[\"metre\",1.0]]";
 
 		return CRS.parseWKT(wsrWKT);
@@ -194,8 +185,7 @@ public class MQProjections {
 	 * @return The MathTransform object
 	 * @throws FactoryException
 	 */
-	public MathTransform getRadarTransform(CinradHeader header)
-			throws FactoryException {
+	public MathTransform getRadarTransform(CinradHeader header) throws FactoryException {
 
 		return getRadarTransform(header.getLon(), header.getLat());
 	}
@@ -213,13 +203,32 @@ public class MQProjections {
 	 * @return The MathTransform object
 	 * @throws FactoryException
 	 */
-	public MathTransform getRadarTransform(double lon, double lat)
-			throws FactoryException {
+	public MathTransform getRadarTransform(double lon, double lat) throws FactoryException {
 
 		CoordinateReferenceSystem inCS = getRadarCoordinateSystem(lon, lat);
 		CoordinateReferenceSystem outCS = getWGS84CoordinateSystem();
 
 		return CRS.findMathTransform(inCS, outCS);
+
+	}
+
+	public CoordinateReferenceSystem getCoordinateSystemByProjectionType(ProjectionType type, double lon, double lat)
+			throws FactoryException {
+		switch (type) {
+		case AZIMUTHAL_EQUIDISTANT:
+			return getRadarCoordinateSystem(lon, lat);
+
+		case WGS84:
+
+			return getWGS84CoordinateSystem();
+
+		case BEIJING_1954:
+			return getBeijing1954CoordinateSystem();
+
+		default:
+			return null;
+
+		}
 
 	}
 

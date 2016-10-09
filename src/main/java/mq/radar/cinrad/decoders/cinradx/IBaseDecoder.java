@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.commons.configuration.Configuration;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.operation.TransformException;
 
 import mq.radar.cinrad.decoders.DecodeException;
 import mq.radar.cinrad.decoders.DecodeHintNotSupportedException;
@@ -24,7 +25,7 @@ public interface IBaseDecoder {
 	/**
 	 * Decode the data
 	 */
-	public void decodeData(boolean autoClosed) throws DecodeException, IOException;
+	public void decodeData(boolean autoClosed) throws DecodeException, IOException, TransformException;
 
 	public Configuration getDecodeHintsConfig();
 

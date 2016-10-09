@@ -1,8 +1,8 @@
 package mq.radar.cinrad.decoders;
 
+import mq.radar.cinrad.MQProjections;
 import mq.radar.cinrad.decoders.cinrad.CindarProducts;
 import mq.radar.cinrad.decoders.cinrad.CinradHeader;
-import mq.radar.cinrad.decoders.cinrad.MQProjections;
 
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;

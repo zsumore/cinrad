@@ -2,8 +2,6 @@ package mq.radar.cinrad.projection;
 
 import static org.junit.Assert.*;
 
-import mq.radar.cinrad.decoders.cinrad.MQProjections;
-
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.referencing.CRS;
 import org.junit.After;
@@ -13,6 +11,8 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
+
+import mq.radar.cinrad.MQProjections;
 
 public class AlbersEquidistantTest {
 

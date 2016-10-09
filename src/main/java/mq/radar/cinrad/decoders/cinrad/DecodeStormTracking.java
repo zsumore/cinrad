@@ -3,6 +3,7 @@ package mq.radar.cinrad.decoders.cinrad;
 import java.io.IOException;
 import java.util.Vector;
 
+import mq.radar.cinrad.MQProjections;
 import mq.radar.cinrad.decoders.DecodeException;
 import mq.radar.cinrad.decoders.StreamingProcess;
 

@@ -9,28 +9,9 @@ import ucar.unidata.io.RandomAccessFile;
 
 public class CAPPIProduct implements ICinradXBuilder, ICinradXProduct {
 
-	private CommonBlocks commonBlocks;
-
-	private ProductHeader productHeader;
-
-	private ProductDependentParameter productDependentParameter;
+	private ICinradXHeader cinradXHeader;
 
 	private List<RadialDataBlock> radialDataBlocks;
-
-	@Override
-	public CommonBlocks getCommonBlocks() {
-		return commonBlocks;
-	}
-
-	@Override
-	public ProductHeader getProductHeader() {
-		return productHeader;
-	}
-
-	@Override
-	public ProductDependentParameter getProductDependentParameter() {
-		return productDependentParameter;
-	}
 
 	public List<RadialDataBlock> getRadialDataBlocks() {
 		return radialDataBlocks;
@@ -38,9 +19,13 @@ public class CAPPIProduct implements ICinradXBuilder, ICinradXProduct {
 
 	@Override
 	public String toString() {
-		return "CAPPIProduct [commonBlocks=" + commonBlocks + ", productHeader=" + productHeader
-				+ ", productDependentParameter=" + productDependentParameter + ", radialDataBlocks=" + radialDataBlocks
-				+ "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("CAPPIProduct [cinradXHeader=");
+		builder.append(cinradXHeader);
+		builder.append(", radialDataBlocks=");
+		builder.append(radialDataBlocks);
+		builder.append("]");
+		return builder.toString();
 	}
 
 	@Override
@@ -48,14 +33,19 @@ public class CAPPIProduct implements ICinradXBuilder, ICinradXProduct {
 		if (pos >= 0)
 			file.seek(pos);
 
-		commonBlocks = new CommonBlocks();
+		cinradXHeader = new CinradXHeader();
+
+		CommonBlocks commonBlocks = new CommonBlocks();
 		commonBlocks.builder(file, -1);
+		cinradXHeader.setCommonBlocks(commonBlocks);
 
-		productHeader = new ProductHeader();
+		ProductHeader productHeader = new ProductHeader();
 		productHeader.builder(file, -1);
+		cinradXHeader.setProductHeader(productHeader);
 
-		productDependentParameter = new ProductDependentParameter(
+		ProductDependentParameter productDependentParameter = new ProductDependentParameter(
 				CinradXUtils.getProductType(productHeader.getProductNumber()), file.readBytes(64));
+		cinradXHeader.setProductDependentParameter(productDependentParameter);
 
 		radialDataBlocks = new ArrayList<>();
 		for (int i = 0; i < (Integer) productDependentParameter.getProductParamValues()[0]; i++) {
@@ -63,6 +53,12 @@ public class CAPPIProduct implements ICinradXBuilder, ICinradXProduct {
 			radialDataBlock.builder(file, -1);
 		}
 
+	}
+
+	@Override
+	public ICinradXHeader getICinradXHeader() {
+
+		return this.cinradXHeader;
 	}
 
 }

@@ -7,27 +7,14 @@ import ucar.unidata.io.RandomAccessFile;
 
 public class RadialProduct implements ICinradXBuilder, ICinradXProduct {
 
-	private CommonBlocks commonBlocks;
-
-	private ProductHeader productHeader;
-
-	private ProductDependentParameter productDependentParameter;
+	private ICinradXHeader cinradXHeader;
 
 	private RadialDataBlock radialDataBlock;
 
 	@Override
-	public CommonBlocks getCommonBlocks() {
-		return commonBlocks;
-	}
+	public ICinradXHeader getICinradXHeader() {
 
-	@Override
-	public ProductHeader getProductHeader() {
-		return productHeader;
-	}
-
-	@Override
-	public ProductDependentParameter getProductDependentParameter() {
-		return productDependentParameter;
+		return this.cinradXHeader;
 	}
 
 	public RadialDataBlock getRadialDataBlock() {
@@ -36,9 +23,13 @@ public class RadialProduct implements ICinradXBuilder, ICinradXProduct {
 
 	@Override
 	public String toString() {
-		return "RadialProduct [commonBlocks=" + commonBlocks + ", productHeader=" + productHeader
-				+ ", productDependentParameter=" + productDependentParameter + ", radialDataBlock=" + radialDataBlock
-				+ "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("RadialProduct [cinradXHeader=");
+		builder.append(cinradXHeader);
+		builder.append(", radialDataBlock=");
+		builder.append(radialDataBlock);
+		builder.append("]");
+		return builder.toString();
 	}
 
 	@Override
@@ -46,14 +37,19 @@ public class RadialProduct implements ICinradXBuilder, ICinradXProduct {
 		if (pos >= 0)
 			file.seek(pos);
 
-		commonBlocks = new CommonBlocks();
+		cinradXHeader = new CinradXHeader();
+
+		CommonBlocks commonBlocks = new CommonBlocks();
 		commonBlocks.builder(file, -1);
+		cinradXHeader.setCommonBlocks(commonBlocks);
 
-		productHeader = new ProductHeader();
+		ProductHeader productHeader = new ProductHeader();
 		productHeader.builder(file, -1);
+		cinradXHeader.setProductHeader(productHeader);
 
-		productDependentParameter = new ProductDependentParameter(
+		ProductDependentParameter productDependentParameter = new ProductDependentParameter(
 				CinradXUtils.getProductType(productHeader.getProductNumber()), file.readBytes(64));
+		cinradXHeader.setProductDependentParameter(productDependentParameter);
 
 		radialDataBlock = new RadialDataBlock();
 		radialDataBlock.builder(file, -1);

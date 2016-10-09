@@ -6,7 +6,7 @@ public class MQXFilter {
 	public static final double NO_MAX_VALUE = Double.POSITIVE_INFINITY;
 
 	public static final double NO_MIN_AZIMUTH = 0.0;
-	public static final double NO_MAX_AZIMUTH = 10000.0;
+	public static final double NO_MAX_AZIMUTH = 360.0;
 
 	private double minValue = NO_MIN_VALUE;
 	private double maxValue = NO_MAX_VALUE;
@@ -35,25 +35,31 @@ public class MQXFilter {
 		this.maxValue = maxValue;
 	}
 
-	public void setAzimuthRange(double minAzimuth, double maxAzimuth) {
-		this.minAzimuth = minAzimuth;
-		this.maxAzimuth = maxAzimuth;
-		if (minAzimuth < 0) {
-			minAzimuth += 360;
-		}
-		if (maxAzimuth < 0) {
-			maxAzimuth += 360;
-		}
-		if (minAzimuth > 360) {
-			minAzimuth = minAzimuth % 360;
-		}
-		if (maxAzimuth > 360) {
-			maxAzimuth = maxAzimuth % 360;
-		}
-		if (minAzimuth > maxAzimuth) {
-			// double work = minAzimuth;
-			minAzimuth = maxAzimuth;
-			maxAzimuth = minAzimuth;
+	public void setAzimuthRange(double minA, double maxA) {
+		if (Math.abs(maxA - minA) < 360) {
+			if (maxA >= minA) {
+				this.minAzimuth = minA;
+				this.maxAzimuth = maxA;
+			} else {
+				this.minAzimuth = maxA;
+				this.maxAzimuth = minA;
+			}
+			if (minAzimuth < 0) {
+				minAzimuth = minAzimuth % 360 + 360;
+			}
+			if (maxAzimuth < 0) {
+				maxAzimuth = maxAzimuth % 360 + 360;
+			}
+			if (minAzimuth > 360) {
+				minAzimuth = minAzimuth % 360;
+			}
+			if (maxAzimuth > 360) {
+				maxAzimuth = maxAzimuth % 360;
+			}
+			if (minAzimuth > maxAzimuth) {
+
+				maxAzimuth += 360;
+			}
 		}
 	}
 

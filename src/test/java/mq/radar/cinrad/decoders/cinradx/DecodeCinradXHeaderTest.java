@@ -27,20 +27,21 @@ public class DecodeCinradXHeaderTest {
 
 	@After
 	public void tearDown() throws Exception {
-		
+
 		decodeCinradXHeader.getRandomAccessFile().close();
-		decodeCinradXHeader=null;
+		decodeCinradXHeader = null;
 	}
 
 	@Test
 	public void testGetCommonBlocks() {
-		
-		
-		assertTrue(decodeCinradXHeader.getCommonBlocks().getGenericHeader().getProductType()==1);
-		
-		assertTrue(decodeCinradXHeader.getProductHeader().getProductNumber()==1);
-		
-		
+
+		assertTrue(decodeCinradXHeader.getICinradXHeader().getCommonBlocks().getGenericHeader().getProductType() == 1);
+
+		assertTrue(decodeCinradXHeader.getICinradXHeader().getProductHeader().getProductNumber() == 1);
+
+		System.out.println(decodeCinradXHeader.getICinradXHeader().getCommonBlocks().toString());
+		System.out.println(decodeCinradXHeader.getICinradXHeader().getProductHeader().toString());
+
 	}
 
 }

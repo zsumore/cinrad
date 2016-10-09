@@ -10,39 +10,17 @@ import mq.radar.cinrad.decoders.cinradx.productparams.ProductDependentParameter;
 import ucar.unidata.io.InMemoryRandomAccessFile;
 import ucar.unidata.io.RandomAccessFile;
 
-public class DecodeCinradXHeader implements ICinradXHeader {
+public class DecodeCinradXHeader implements IDecodeCinradXHeader {
 
 	private final Logger logger = LoggerFactory.getLogger(DecodeCinradXHeader.class);
 
 	private RandomAccessFile f;
 
-	private CommonBlocks commonBlocks;
-
-	private ProductHeader productHeader;
-
-	private ProductDependentParameter productDependentParameter;
+	private ICinradXHeader cinradXheader;
 
 	private URL url = null;
 
 	private Long length = null;
-
-	@Override
-	public CommonBlocks getCommonBlocks() {
-
-		return commonBlocks;
-	}
-
-	@Override
-	public ProductHeader getProductHeader() {
-
-		return productHeader;
-	}
-
-	@Override
-	public ProductDependentParameter getProductDependentParameter() {
-
-		return productDependentParameter;
-	}
 
 	@Override
 	public RandomAccessFile getRandomAccessFile() {
@@ -93,20 +71,24 @@ public class DecodeCinradXHeader implements ICinradXHeader {
 
 			f.seek(0);
 
+			cinradXheader = new CinradXHeader();
+
 			logger.debug("Start build CommonBlocks");
-			commonBlocks = new CommonBlocks();
+			CommonBlocks commonBlocks = new CommonBlocks();
 			commonBlocks.builder(f, -1);
+			cinradXheader.setCommonBlocks(commonBlocks);
 			logger.debug("After build CommonBlocks File Pointer:{}", f.getFilePointer());
 
 			logger.debug("Start build ProductHeader");
-			productHeader = new ProductHeader();
+			ProductHeader productHeader = new ProductHeader();
 			productHeader.builder(f, -1);
+			cinradXheader.setProductHeader(productHeader);
 			logger.debug("After build ProductHeader File Pointer:{}", f.getFilePointer());
 
 			logger.debug("Start build ProductDependentParameter");
-			productDependentParameter = new ProductDependentParameter(
+			ProductDependentParameter productDependentParameter = new ProductDependentParameter(
 					CinradXUtils.getProductType(productHeader.getProductNumber()), f.readBytes(64));
-
+			cinradXheader.setProductDependentParameter(productDependentParameter);
 			logger.debug("After build ProductDependentParameter File Pointer:{}", f.getFilePointer());
 
 			this.length = f.getFilePointer();
@@ -146,6 +128,12 @@ public class DecodeCinradXHeader implements ICinradXHeader {
 	public Long getCinradXHeaderLength() {
 
 		return length;
+	}
+
+	@Override
+	public ICinradXHeader getICinradXHeader() {
+
+		return this.cinradXheader;
 	}
 
 }

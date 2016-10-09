@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import mq.radar.cinrad.MQFilter;
+import mq.radar.cinrad.MQProjections;
 import mq.radar.cinrad.common.Hex;
 import mq.radar.cinrad.decoders.DecodeException;
 import mq.radar.cinrad.decoders.DecodeHintNotSupportedException;
@@ -42,8 +43,7 @@ import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
  * 
  */
 public class DecodeStreamingRadial extends BaseCindarDecoder {
-	private final Logger logger = LoggerFactory
-			.getLogger(DecodeStreamingRadial.class);
+	private final Logger logger = LoggerFactory.getLogger(DecodeStreamingRadial.class);
 
 	private final double geometryBuffer = 0.00006;
 	private final double geometrySimplify = 0.0001;
@@ -74,8 +74,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 	 * @throws IOException
 	 * @throws DecodeException
 	 */
-	public DecodeStreamingRadial(CinradHeader header) throws DecodeException,
-			IOException, FactoryException {
+	public DecodeStreamingRadial(CinradHeader header) throws DecodeException, IOException, FactoryException {
 		super(header);
 		this.decoderName = "DecodeStreamingRadial";
 
@@ -87,8 +86,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 
 	@Override
 	public String[] getSupplementalDataArray() throws IOException {
-		logger.debug("LOADING SUPPLEMENTAL DATA... URL="
-				+ header.getCinradURL().toString());
+		logger.debug("LOADING SUPPLEMENTAL DATA... URL=" + header.getCinradURL().toString());
 
 		NetcdfFile ncfile = NetcdfFile.open(header.getCinradURL().toString());
 		try {
@@ -103,8 +101,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 			// logger.fine("Data Array Dimensions: ");
 			if (logger.isDebugEnabled()) {
 				for (int n = 0; n < shape.length; n++) {
-					logger.debug("TabMessagePage Dimension[" + n + "] "
-							+ shape[n]);
+					logger.debug("TabMessagePage Dimension[" + n + "] " + shape[n]);
 				}
 			}
 			supplementalData = new String[shape[0]];
@@ -126,8 +123,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 	}
 
 	@Override
-	public void decodeData(StreamingProcess[] processArray, boolean autoClose)
-			throws DecodeException, IOException {
+	public void decodeData(StreamingProcess[] processArray, boolean autoClose) throws DecodeException, IOException {
 
 		polyVector = new HashMap<Integer, Vector<Polygon>>();
 		coordinates = new Vector<Coordinate>();
@@ -168,12 +164,10 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 		geoIndex = 0;
 
 		try {
-			cinradTransform = MQProjections.getInstance().getRadarTransform(
-					header);
+			cinradTransform = MQProjections.getInstance().getRadarTransform(header);
 		} catch (FactoryException e1) {
 			logger.error("FactoryException", e1);
-			throw new DecodeException("PROJECTION TRANSFORM ERROR",
-					header.getCinradURL());
+			throw new DecodeException("PROJECTION TRANSFORM ERROR", header.getCinradURL());
 		}
 
 		// Initiate binary buffered read
@@ -211,16 +205,12 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 				GeometryCollection[] polyCollections = new GeometryCollection[16];
 				for (int i = 0; i < 16; i++) {
 					if (polyVector.get(i).size() > 0) {
-						Polygon[] polyArray = new Polygon[polyVector.get(i)
-								.size()];
+						Polygon[] polyArray = new Polygon[polyVector.get(i).size()];
 						polyCollections[i] = geoFactory
-								.createGeometryCollection((Polygon[]) (polyVector
-										.get(i).toArray(polyArray)));
-						Geometry union = polyCollections[i]
-								.buffer(geometryBuffer);
+								.createGeometryCollection((Polygon[]) (polyVector.get(i).toArray(polyArray)));
+						Geometry union = polyCollections[i].buffer(geometryBuffer);
 
-						union = TopologyPreservingSimplifier.simplify(union,
-								geometrySimplify);
+						union = TopologyPreservingSimplifier.simplify(union, geometrySimplify);
 
 						logger.debug("Geometry Type:" + union.getGeometryType());
 
@@ -232,10 +222,9 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 
 						try {
 							// create the feature
-							SimpleFeature feature = SimpleFeatureBuilder.build(
-									schema, new Object[] { (Geometry) union,
-											value, color }, new Integer(
-											geoIndex++).toString());
+							SimpleFeature feature = SimpleFeatureBuilder.build(schema,
+									new Object[] { (Geometry) union, value, color },
+									new Integer(geoIndex++).toString());
 							for (int n = 0; n < processArray.length; n++) {
 								processArray[n].addFeature(feature);
 							}
@@ -252,27 +241,19 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 					Integer color = new Integer(i);
 					Float value = getFloatDataThreshold(i);
 
-					logger.debug(header.getDataThresholdString(i) + "   "
-							+ value);
+					logger.debug(header.getDataThresholdString(i) + "   " + value);
 
-					logger.debug("polyVector {} size:{}", i, polyVector.get(i)
-							.size());
+					logger.debug("polyVector {} size:{}", i, polyVector.get(i).size());
 
-					logger.debug("schema {} attributeCount:{}", i,
-							schema.getAttributeCount());
+					logger.debug("schema {} attributeCount:{}", i, schema.getAttributeCount());
 
 					for (int j = 0; j < polyVector.get(i).size(); j++) {
 						try {
 							// logger.fine(color);
 							// create the feature
-							SimpleFeature feature = SimpleFeatureBuilder
-									.build(schema,
-											new Object[] {
-													(Geometry) polyVector
-															.get(i)
-															.elementAt(j),
-													value, color },
-											new Integer(geoIndex++).toString());
+							SimpleFeature feature = SimpleFeatureBuilder.build(schema,
+									new Object[] { (Geometry) polyVector.get(i).elementAt(j), value, color },
+									new Integer(geoIndex++).toString());
 
 							for (int n = 0; n < processArray.length; n++) {
 								processArray[n].addFeature(feature);
@@ -297,8 +278,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 			}
 
 			e.printStackTrace();
-			throw new DecodeException("CAUGHT EXCEPTION:  \n" + e
-					+ "\n--- THIS DATA IS POSSIBLY CORRUPT ---",
+			throw new DecodeException("CAUGHT EXCEPTION:  \n" + e + "\n--- THIS DATA IS POSSIBLY CORRUPT ---",
 					header.getCinradURL());
 
 		} finally {
@@ -354,11 +334,10 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 		 * / Decode Date and Time hour = (short)(uniqueInfo[4]/60.0); minute =
 		 * (short)(uniqueInfo[4]%60.0); yyyymmdd =
 		 * convertJulianDate(uniqueInfo[3]); logger.fine("LAT: "+lat);
-		 * logger.fine("LON: "+lon); logger.fine("ALT: "+alt);
-		 * logger.fine("MAX: "+uniqueInfo[0]);
-		 * logger.fine("BIAS: "+uniqueInfo[1]);
-		 * logger.fine("ERR.VAR.: "+uniqueInfo[2]);
-		 * logger.fine(yyyymmdd+" "+hour+":"+minute);
+		 * logger.fine("LON: "+lon); logger.fine("ALT: "+alt); logger.fine(
+		 * "MAX: "+uniqueInfo[0]); logger.fine("BIAS: "+uniqueInfo[1]);
+		 * logger.fine("ERR.VAR.: "+uniqueInfo[2]); logger.fine(yyyymmdd+" "
+		 * +hour+":"+minute);
 		 */
 		// -------------------------------*
 		// Decode the actual RLE data
@@ -396,19 +375,15 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 
 		double startingY;
 		if (dataHeader[5] == 4) {
-			startingX = ((double) dataHeader[3] + 0.5) * 1000.0
-					* (double) dataHeader[5];
+			startingX = ((double) dataHeader[3] + 0.5) * 1000.0 * (double) dataHeader[5];
 		} else {
-			startingX = ((double) dataHeader[3] + 1.0) * 1000.0
-					* (double) dataHeader[5];
+			startingX = ((double) dataHeader[3] + 1.0) * 1000.0 * (double) dataHeader[5];
 		}
 
 		if (dataHeader[7] == 4) {
-			startingY = ((double) dataHeader[4] + 0.5) * 1000.0
-					* (double) dataHeader[7];
+			startingY = ((double) dataHeader[4] + 0.5) * 1000.0 * (double) dataHeader[7];
 		} else {
-			startingY = ((double) dataHeader[4] + 1.0) * 1000.0
-					* (double) dataHeader[7];
+			startingY = ((double) dataHeader[4] + 1.0) * 1000.0 * (double) dataHeader[7];
 		}
 
 		if (header.getProductCode() == 38) {
@@ -460,6 +435,9 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 				// Isolate the last 4 bits by adding 4 blank bits and
 				// subtracting
 				colorCode = (int) data - (numBins << 4);
+				
+				System.out.println("------------------colorCode-------------------------");
+				System.out.println(colorCode);
 
 				boolean colorCodeTest;
 				// Check category filter from NexradFilter
@@ -486,7 +464,8 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 					// Vector coordinates = new Vector();
 					coordinates.clear();
 
-					// logger.fine("numBins= "+numBins+" ***** colorCode= "+colorCode);
+					// logger.fine("numBins= "+numBins+" ***** colorCode=
+					// "+colorCode);
 
 					// If xrun > 1 then create polygon from to encircle each
 					// grid cell during run
@@ -500,25 +479,19 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 					albX = new double[2 + numBins * 2];
 					albY = new double[2 + numBins * 2];
 
-					albX[0] = runTotal * 1000 * dataHeader[5] - range
-							- startingX;
-					albY[0] = range + startingY - (y + 1) * 1000
-							* dataHeader[7];
-					albX[1] = runTotal * 1000 * dataHeader[5] - range
-							- startingX;
+					albX[0] = runTotal * 1000 * dataHeader[5] - range - startingX;
+					albY[0] = range + startingY - (y + 1) * 1000 * dataHeader[7];
+					albX[1] = runTotal * 1000 * dataHeader[5] - range - startingX;
 					albY[1] = range + startingY - y * 1000 * dataHeader[7];
 
 					for (int nr = 0; nr < numBins; nr++) {
-						albX[2 + nr] = (runTotal + nr + 1) * 1000
-								* dataHeader[5] - range - startingX;
-						albY[2 + nr] = range + startingY - y * 1000
-								* dataHeader[7];
+						albX[2 + nr] = (runTotal + nr + 1) * 1000 * dataHeader[5] - range - startingX;
+						albY[2 + nr] = range + startingY - y * 1000 * dataHeader[7];
 					}
 					for (int nr = numBins - 1; nr >= 0; nr--) {
-						albX[2 + numBins + (numBins - 1 - nr)] = (runTotal + nr + 1)
-								* 1000 * dataHeader[5] - range - startingX;
-						albY[2 + numBins + (numBins - 1 - nr)] = range
-								+ startingY - (y + 1) * 1000 * dataHeader[7];
+						albX[2 + numBins + (numBins - 1 - nr)] = (runTotal + nr + 1) * 1000 * dataHeader[5] - range
+								- startingX;
+						albY[2 + numBins + (numBins - 1 - nr)] = range + startingY - (y + 1) * 1000 * dataHeader[7];
 					}
 
 					for (int nr = 0; nr < 2 + numBins * 2; nr++) {
@@ -533,8 +506,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 						double[] srcPts = { albX[nr], albY[nr] };
 						double[] dstPts = new double[2];
 						cinradTransform.transform(srcPts, 0, dstPts, 0, 1);
-						coordinates.addElement(new Coordinate(dstPts[0],
-								dstPts[1]));
+						coordinates.addElement(new Coordinate(dstPts[0], dstPts[1]));
 					}
 					// Add the first point again to close polygon
 
@@ -542,22 +514,19 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 					double[] dstPts = new double[2];
 					cinradTransform.transform(srcPts, 0, dstPts, 0, 1);
 
-					coordinates
-							.addElement(new Coordinate(dstPts[0], dstPts[1]));
+					coordinates.addElement(new Coordinate(dstPts[0], dstPts[1]));
 
 					try {
 
 						Coordinate[] cArray = new Coordinate[coordinates.size()];
 						logger.debug("Coordinate Size: " + coordinates.size());
-						LinearRing lr = geoFactory.createLinearRing(coordinates
-								.toArray(cArray));
+						LinearRing lr = geoFactory.createLinearRing(coordinates.toArray(cArray));
 						Polygon poly = geoFactory.createPolygon(lr, null);
 
 						if (nxfilter == null || nxfilter.accept(poly)) {
 
 							if (nxfilter != null) {
-								poly = (Polygon) (nxfilter
-										.clipToExtentFilter(poly));
+								poly = (Polygon) (nxfilter.clipToExtentFilter(poly));
 							}
 
 							if (poly != null) {
@@ -634,8 +603,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 
 		String packetCodeHex = Hex.toHex(dataHeader[0]);
 		logger.debug("RADIAL: dataHeader[0] HEX: " + packetCodeHex);
-		if (packetCodeHex.equalsIgnoreCase("BA0F")
-				|| packetCodeHex.equalsIgnoreCase("BA07")) {
+		if (packetCodeHex.equalsIgnoreCase("BA0F") || packetCodeHex.equalsIgnoreCase("BA07")) {
 
 			logger.debug("SENDING TO RASTER DECODER");
 
@@ -646,8 +614,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 
 		double binSpacing = dataHeader[5];
 
-		if (header.getProductCode() == 25 || header.getProductCode() == 28
-				|| header.getProductCode() == 44) {
+		if (header.getProductCode() == 25 || header.getProductCode() == 28 || header.getProductCode() == 44) {
 			binSpacing /= 3.875;
 		}
 
@@ -692,8 +659,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 		if (nxfilter != null) {
 			startbin = (int) (((nxfilter.getMinDistance() * 1000 - binSpacing) / binSpacing) + 0.01);
 			endbin = (int) (((nxfilter.getMaxDistance() * 1000 - binSpacing) / binSpacing) + 0.01);
-			if (startbin < 0
-					|| nxfilter.getMinDistance() == MQFilter.NO_MIN_DISTANCE) {
+			if (startbin < 0 || nxfilter.getMinDistance() == MQFilter.NO_MIN_DISTANCE) {
 				startbin = 0;
 			}
 			if (nxfilter.getMaxDistance() == MQFilter.NO_MAX_DISTANCE) {
@@ -731,20 +697,17 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 
 			// When we are done with 360 degrees STOP! (Files keep going
 			// sometimes)
-			if (angle2 < savedStartAngle && y > 300
-					&& Math.abs(angle2 - savedStartAngle) < 100) {
+			if (angle2 < savedStartAngle && y > 300 && Math.abs(angle2 - savedStartAngle) < 100) {
 				angle2 = savedStartAngle;
 				y = 10000000;
 			}
 
 			// Add .00000001 to any 0, 90, 180, 270, 360 values to prevent sin
 			// or cos error
-			if (angle1 == 0.0 || angle1 == 90.0 || angle1 == 180.0
-					|| angle1 == 270.0 || angle1 == 360.0) {
+			if (angle1 == 0.0 || angle1 == 90.0 || angle1 == 180.0 || angle1 == 270.0 || angle1 == 360.0) {
 				angle1 += 0.00001;
 			}
-			if (angle2 == 0.0 || angle2 == 90.0 || angle2 == 180.0
-					|| angle2 == 270.0 || angle2 == 360.0) {
+			if (angle2 == 0.0 || angle2 == 90.0 || angle2 == 180.0 || angle2 == 270.0 || angle2 == 360.0) {
 				angle2 += 0.00001;
 			}
 
@@ -772,8 +735,10 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 				numBins = (int) data >> 4;
 				// Isolate the last 4 bits by adding 4 blank bits and
 				// subtracting
-				colorCode = (int) data - (numBins << 4);
-
+			    //System.out.println("--------------------------------colorcode");
+			    //TODO
+				colorCode = (int) data - (numBins << 4) -2;
+				//System.out.println(colorCode);
 				// Ignore the first bin from the wsr
 				if (runTotal == 0) {
 					numBins--;
@@ -809,9 +774,8 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 					}
 				}
 
-				if (colorCodeTest && numBins > 0
-						&& (runTotal + numBins) >= startbin
-						&& runTotal < endbin && numBins - startRun > 0) {
+				if (colorCodeTest && numBins > 0 && (runTotal + numBins) >= startbin && runTotal < endbin
+						&& numBins - startRun > 0) {
 					coordinates.clear();
 
 					// set the maximum distance limit
@@ -819,7 +783,8 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 						numBins = endbin - runTotal;
 					}
 
-					// logger.fine("numBins= "+numBins+" ***** colorCode= "+colorCode);
+					// logger.fine("numBins= "+numBins+" ***** colorCode=
+					// "+colorCode);
 
 					// If xrun > 1 then create polygon from to encircle each
 					// grid cell during run
@@ -833,29 +798,19 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 					albX = new double[2 + (numBins - startRun) * 2];
 					albY = new double[2 + (numBins - startRun) * 2];
 
-					albX[0] = (runTotal + startRun) * binSpacing
-							* Math.cos(angle2);
-					albY[0] = (runTotal + startRun) * binSpacing
-							* Math.sin(angle2);
-					albX[1] = (runTotal + startRun) * binSpacing
-							* Math.cos(angle1);
-					albY[1] = (runTotal + startRun) * binSpacing
-							* Math.sin(angle1);
+					albX[0] = (runTotal + startRun) * binSpacing * Math.cos(angle2);
+					albY[0] = (runTotal + startRun) * binSpacing * Math.sin(angle2);
+					albX[1] = (runTotal + startRun) * binSpacing * Math.cos(angle1);
+					albY[1] = (runTotal + startRun) * binSpacing * Math.sin(angle1);
 
 					for (int nr = 0; nr < numBins - startRun; nr++) {
-						albX[2 + nr] = (runTotal + startRun + nr + 1)
-								* binSpacing * Math.cos(angle1);
-						albY[2 + nr] = (runTotal + startRun + nr + 1)
-								* binSpacing * Math.sin(angle1);
+						albX[2 + nr] = (runTotal + startRun + nr + 1) * binSpacing * Math.cos(angle1);
+						albY[2 + nr] = (runTotal + startRun + nr + 1) * binSpacing * Math.sin(angle1);
 					}
 					for (int nr = numBins - startRun - 1; nr >= 0; nr--) {
-						albX[2 + numBins - startRun
-								+ (numBins - startRun - 1 - nr)] = (runTotal
-								+ startRun + nr + 1)
+						albX[2 + numBins - startRun + (numBins - startRun - 1 - nr)] = (runTotal + startRun + nr + 1)
 								* binSpacing * Math.cos(angle2);
-						albY[2 + numBins - startRun
-								+ (numBins - startRun - 1 - nr)] = (runTotal
-								+ startRun + nr + 1)
+						albY[2 + numBins - startRun + (numBins - startRun - 1 - nr)] = (runTotal + startRun + nr + 1)
 								* binSpacing * Math.sin(angle2);
 					}
 					for (int nr = 0; nr < 2 + (numBins - startRun) * 2; nr++) {
@@ -863,8 +818,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 						double[] srcPts = { albX[nr], albY[nr] };
 						double[] dstPts = new double[2];
 						cinradTransform.transform(srcPts, 0, dstPts, 0, 1);
-						coordinates.addElement(new Coordinate(dstPts[0],
-								dstPts[1]));
+						coordinates.addElement(new Coordinate(dstPts[0], dstPts[1]));
 
 					}
 					// Add the first point again to close polygon
@@ -873,23 +827,18 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 					double[] dstPts = new double[2];
 					cinradTransform.transform(srcPts, 0, dstPts, 0, 1);
 
-					coordinates
-							.addElement(new Coordinate(dstPts[0], dstPts[1]));
+					coordinates.addElement(new Coordinate(dstPts[0], dstPts[1]));
 
 					// Create polygon
 					try {
 						Coordinate[] cArray = new Coordinate[coordinates.size()];
-						LinearRing lr = geoFactory.createLinearRing(coordinates
-								.toArray(cArray));
-						Polygon poly = JTSUtilities
-								.makeGoodShapePolygon(geoFactory.createPolygon(
-										lr, null));
+						LinearRing lr = geoFactory.createLinearRing(coordinates.toArray(cArray));
+						Polygon poly = JTSUtilities.makeGoodShapePolygon(geoFactory.createPolygon(lr, null));
 
 						if (nxfilter == null || nxfilter.accept(poly)) {
 
 							if (nxfilter != null) {
-								poly = (Polygon) (nxfilter
-										.clipToExtentFilter(poly));
+								poly = (Polygon) (nxfilter.clipToExtentFilter(poly));
 							}
 
 							if (poly != null) {
@@ -922,7 +871,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 				listeners.get(n).decodeProgress(event);
 			}
 
-		}// OUTER LOOP end
+		} // OUTER LOOP end
 
 	} // END Radial loop
 
@@ -950,15 +899,9 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 				} else if (dataThreshold.equals("ND")) {
 					value = new Float(-999);
 				} else if (dataThreshold.charAt(0) == '-') {
-					value = new Float(
-							"-"
-									+ dataThreshold.substring(2,
-											dataThreshold.length()));
+					value = new Float("-" + dataThreshold.substring(2, dataThreshold.length()));
 				} else if (dataThreshold.charAt(0) == '+') {
-					value = new Float(
-							"+"
-									+ dataThreshold.substring(2,
-											dataThreshold.length()));
+					value = new Float("+" + dataThreshold.substring(2, dataThreshold.length()));
 				} else {
 					value = new Float(dataThreshold);
 				}
@@ -973,11 +916,9 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 	}
 
 	@Override
-	public void setDecodeHint(String hintKey, Object hintValue)
-			throws DecodeHintNotSupportedException {
+	public void setDecodeHint(String hintKey, Object hintValue) throws DecodeHintNotSupportedException {
 		if (!decodeHints.keySet().contains(hintKey)) {
-			throw new DecodeHintNotSupportedException(this.decoderName,
-					hintKey, decodeHints);
+			throw new DecodeHintNotSupportedException(this.decoderName, hintKey, decodeHints);
 		}
 		decodeHints.put(hintKey, hintValue);
 

@@ -1,15 +1,12 @@
-package mq.radar.cinrad.decoders.cinrad;
+package mq.radar.cinrad.decoders.cinradx;
+
+import static org.junit.Assert.fail;
 
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 
-import mq.radar.cinrad.MQFilter;
-import mq.radar.cinrad.MQProjections;
-import mq.radar.cinrad.decoders.DecodeException;
-import mq.radar.cinrad.decoders.DecodeHintNotSupportedException;
-
-import org.geotools.data.simple.SimpleFeatureIterator;
+import org.apache.commons.configuration.ConfigurationException;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.filter.text.cql2.CQL;
 import org.geotools.filter.text.cql2.CQLException;
@@ -26,70 +23,88 @@ import org.geotools.styling.Style;
 import org.geotools.styling.StyleFactory;
 import org.geotools.styling.Symbolizer;
 import org.geotools.swing.JMapFrame;
-import org.opengis.feature.simple.SimpleFeature;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.opengis.filter.FilterFactory;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
-import com.vividsolutions.jts.geom.MultiPolygon;
+import mq.radar.cinrad.MQProjections;
+import mq.radar.cinrad.decoders.DecodeException;
+import mq.radar.cinrad.decoders.DecodeHintNotSupportedException;
+import mq.radar.cinrad.decoders.cinrad.CindarProducts;
+import mq.radar.cinrad.decoders.cinrad.CinradColorFactory;
 
-public class TestCinrad {
+public class DecodeRadialTest {
 
-	/**
-	 * @param args
-	 * @throws DecodeException
-	 * @throws IOException
-	 * @throws FactoryException
-	 * @throws DecodeHintNotSupportedException
-	 * @throws CQLException
-	 * @throws TransformException
-	 */
-	@SuppressWarnings("unused")
+	IDecodeCinradXHeader cinradXHeader;
+
+	DecodeRadial decodeRadial;
+
+	static String dbzf = "data/cinradx/ppi/dBZ/FSNH_20150830000024Z_PPI_01_dBZ";
+
+	@Before
+	public void setUp() throws Exception {
+
+		cinradXHeader = new DecodeCinradXHeader();
+		cinradXHeader.decodeHeader(new File(dbzf).toURI().toURL());
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		cinradXHeader = null;
+		decodeRadial = null;
+	}
+
+	@Test
+	public void test() throws ConfigurationException, DecodeException, IOException, TransformException {
+
+		System.out.println(new File(dbzf).toURI().toURL());
+
+		decodeRadial = new DecodeRadial(cinradXHeader);
+
+		decodeRadial.decodeData(true);
+
+		System.out.println(decodeRadial.getFeatures().size());
+
+		fail("Not yet implemented");
+	}
+
 	public static void main(String[] args) throws DecodeException, IOException, FactoryException,
-			DecodeHintNotSupportedException, CQLException, TransformException {
+			DecodeHintNotSupportedException, CQLException, TransformException, ConfigurationException {
+		IDecodeCinradXHeader cinradXHeader = new DecodeCinradXHeader();
+		cinradXHeader.decodeHeader(new File(dbzf).toURI().toURL());
 
-		String file19 = "data/cinrad/20110916/R/19/20110916.043001.01.19.200";
-		String file20 = "data/20110916/R/20/20110916.043001.01.20.200";
-		String file26 = "data/20111013.220001.01.26.200";
-		String file27 = "data/cinrad/20110916/V/27/20110916.043001.01.27.200";
-		String file41 = "data/20110916/ET/41/20110916.000001.00.41.200";
-		String file46 = "data/20110916/SWS/46/20110916.000001.03.46.200";
-		String file58 = "data/20110916/STI/58/20110916.000001.00.58.200";
-		String file110 = "data/110/20150509.000600.03.110.200";
-		String file119 = "data/cinrad/20160420.084800.02.19.200";
+		DecodeRadial decode = new DecodeRadial(cinradXHeader);
 
-		String file80 = "data/20120709.000000.00.80.200";
-		String file53 = "data/53/20150509.000600.01.53.200";
-		File file = new File(file119);
-		CinradHeader header = new DecodeCinradHeader();
-		header.decodeHeader(file.toURI().toURL());
-		System.out.println(header.toString());
-		// System.out.println(header.getElevNumber());
-		// System.out.println(header.getProductCode()+"----------------------");
-
-		CindarDecoder decode = new DecodeStreamingRadial(header);
-		MQFilter filter = new MQFilter();
+		// MQXFilter filter = new MQXFilter();
 		// valueIndices是多边形color的值，color值的范围为0到15，分别对应反射率因子值0到75dBZ
 		// color值为1到15都显示
-		int[] valueIndices = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+		// int[] valueIndices = { 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 		// int[] valueIndices = { 2, 3, 4, 7, 8, 9, 10, 13, 14,15 };
-		filter.setValueIndices(valueIndices);
-		decode.setDecodeHint("cinradFilter", filter);
+		// filter.setMinValue(15);
+		// filter.setMaxValue();
+		decode.setDecodeHint(IRadialDecoder.RADIAL_MIN_VALUE, 20);
 
 		// 是否减少多边形，如果设为true，会把颜色等级相同而且相邻的多边形合并为一个新的多边形，但是速度会变慢
-		decode.setDecodeHint("reducePolygons", false);
+		decode.setDecodeHint(IRadialDecoder.REDUCE_POLYGONS, false);
 		// decode.setDecodeHint("reducePolygons", true);
 		// System.out.println(System.currentTimeMillis());
-		decode.decodeData();
+		decode.decodeData(true);
 		// System.out.println(System.currentTimeMillis());
 
 		MapContent context = new MapContent();
 		context.setTitle("Quickstart");
 		context.getViewport().setCoordinateReferenceSystem(MQProjections.getInstance().getWGS84CoordinateSystem());
-		context.getViewport().setBounds(new ReferencedEnvelope(header.getCinradBounds(),
+		context.getViewport().setBounds(new ReferencedEnvelope(
+				XMaxGeographicExtent.getCinradExtent(
+						cinradXHeader.getICinradXHeader().getCommonBlocks().getSiteConfiguration().getLatitude(),
+						cinradXHeader.getICinradXHeader().getCommonBlocks().getSiteConfiguration().getLongitude(),
+						80000),
 				MQProjections.getInstance().getWGS84CoordinateSystem()));
 
-		Color[] colors = CinradColorFactory.getColors(header.getProduct());
+		Color[] colors = CinradColorFactory.getColors(CindarProducts.BASE_REFLECTIVITY_19);
 		context.addLayer(new FeatureLayer(decode.getFeatures(), createPolygonStyle(colors)));
 		// context.addLayer(decode.getFeatures(), createPolygonStyle(colors));
 
@@ -102,22 +117,6 @@ public class TestCinrad {
 		mapFrame.setSize(800, 600);
 		mapFrame.getMapPane().reset();
 		mapFrame.setVisible(true);
-		// JMapFrame.showMap(context);
-
-		// System.out.println(header.getLat());
-		// System.out.println(header.getLon());
-		// System.out.println(header.getCinradBounds());
-
-		// SimpleFeatureIterator iterator = decode.getFeatures().features();
-		// while (iterator.hasNext()) {
-		// SimpleFeature feature = iterator.next();
-		// System.out.println(((MultiPolygon) feature.getDefaultGeometry())
-		// .getNumGeometries()
-		// + ";Points:"
-		// + ((MultiPolygon) feature.getDefaultGeometry())
-		// .getNumPoints());
-
-		// }
 
 	}
 

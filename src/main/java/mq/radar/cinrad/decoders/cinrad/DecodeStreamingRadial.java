@@ -34,6 +34,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
 
@@ -220,16 +221,35 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 						Float value = getFloatDataThreshold(i);
 						Integer color = new Integer(i);
 
-						try {
-							// create the feature
-							SimpleFeature feature = SimpleFeatureBuilder.build(schema,
-									new Object[] { (Geometry) union, value, color },
-									new Integer(geoIndex++).toString());
-							for (int n = 0; n < processArray.length; n++) {
-								processArray[n].addFeature(feature);
+						if (union.getGeometryType().equalsIgnoreCase("MultiPolygon")) {
+							MultiPolygon multiPolygon = (MultiPolygon) union;
+
+							for (int j = 0; j < multiPolygon.getNumGeometries(); j++) {
+
+								try {
+									// create the feature
+									SimpleFeature feature = SimpleFeatureBuilder.build(schema,
+											new Object[] { (Geometry) multiPolygon.getGeometryN(j), value, color },
+											new Integer(geoIndex++).toString());
+									for (int n = 0; n < processArray.length; n++) {
+										processArray[n].addFeature(feature);
+									}
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
 							}
-						} catch (Exception e) {
-							e.printStackTrace();
+						} else if (union.getGeometryType().equalsIgnoreCase("Polygon")) {
+							try {
+								// create the feature
+								SimpleFeature feature = SimpleFeatureBuilder.build(schema,
+										new Object[] { (Geometry) union, value, color },
+										new Integer(geoIndex++).toString());
+								for (int n = 0; n < processArray.length; n++) {
+									processArray[n].addFeature(feature);
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						}
 
 					}
@@ -435,7 +455,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 				// Isolate the last 4 bits by adding 4 blank bits and
 				// subtracting
 				colorCode = (int) data - (numBins << 4);
-				
+
 				System.out.println("------------------colorCode-------------------------");
 				System.out.println(colorCode);
 
@@ -735,10 +755,10 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 				numBins = (int) data >> 4;
 				// Isolate the last 4 bits by adding 4 blank bits and
 				// subtracting
-			    //System.out.println("--------------------------------colorcode");
-			    //TODO
-				colorCode = (int) data - (numBins << 4) -2;
-				//System.out.println(colorCode);
+				// System.out.println("--------------------------------colorcode");
+				// TODO
+				colorCode = (int) data - (numBins << 4) - 2;
+				// System.out.println(colorCode);
 				// Ignore the first bin from the wsr
 				if (runTotal == 0) {
 					numBins--;

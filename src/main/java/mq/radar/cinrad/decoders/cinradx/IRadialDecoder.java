@@ -22,6 +22,10 @@ public interface IRadialDecoder extends IBaseDecoder {
 
 	public static final String CRS_TARGET = "crs.target";
 
+	public static final String COLOR_MODE = "color.mode";
+
+	public static final String MULTIPOLYGON_MODE = "multiPolygon.mode";
+
 	/**
 	 * Gets the Features stored after the use of 'decodeData()'
 	 * 

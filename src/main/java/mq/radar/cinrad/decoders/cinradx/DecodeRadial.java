@@ -2,6 +2,7 @@ package mq.radar.cinrad.decoders.cinradx;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
@@ -29,6 +30,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
@@ -48,7 +50,7 @@ public class DecodeRadial implements IRadialDecoder {
 	private double geometryBuffer = 0.000001;
 	private double geometrySimplify = 0.000001;
 
-	private Multimap<Integer, Polygon> polyMultimap = ArrayListMultimap.create();
+	private Multimap<Float, Polygon> polyMultimap;
 
 	protected MQXFilter filter = new MQXFilter();
 
@@ -64,7 +66,11 @@ public class DecodeRadial implements IRadialDecoder {
 
 	protected GeometryFactory geoFactory = null;
 
-	private boolean reducePolys = true;
+	// private boolean reducePolys = true;
+
+	// private boolean colorMode = true;
+
+	// private boolean multiPolygonMode = true;
 
 	private int geoIndex;
 
@@ -93,6 +99,8 @@ public class DecodeRadial implements IRadialDecoder {
 			return;
 		}
 
+		polyMultimap = ArrayListMultimap.create();
+
 		radialDataBlock = new RadialDataBlock();
 		radialDataBlock.builder(this.decodeCinradXHeader.getRandomAccessFile(), -1);
 
@@ -104,7 +112,8 @@ public class DecodeRadial implements IRadialDecoder {
 		builder.setCRS(crs);
 		builder.setName("Cinrad-X Radial Data");
 		builder.add("geom", Geometry.class);
-		builder.add("colorIndex", Integer.class);
+		builder.add("colorIndex", Float.class);
+		builder.add("value", Float.class);
 		schema = builder.buildFeatureType();
 
 		// Reset index counter
@@ -205,11 +214,14 @@ public class DecodeRadial implements IRadialDecoder {
 						LinearRing lr = geoFactory.createLinearRing(cArray);
 						Polygon poly = JTSUtilities.makeGoodShapePolygon(geoFactory.createPolygon(lr, null));
 
-						
+						// System.out.println("value:" + entry.getValue());
 
-						//System.out.println("value:" + entry.getValue());
+						if (configuration.getBoolean(COLOR_MODE, true)) {
 
-						polyMultimap.put(CinradXUtils.getRadialColorIndex(entry.getValue()), poly);
+							polyMultimap.put(CinradXUtils.getRadialColorIndex(entry.getValue()) * 1.0f, poly);
+						} else {
+							polyMultimap.put(entry.getValue(), poly);
+						}
 					}
 
 				}
@@ -218,56 +230,90 @@ public class DecodeRadial implements IRadialDecoder {
 
 		}
 
-		if (reducePolys) {
-			logger.debug("REDUCING POLYGONS!");
+		Set<Float> valueSet = polyMultimap.keySet();
+		// System.out.println(valueSet.size());
+		if (valueSet.size() > 0) {
+			for (Float v : valueSet) {
 
-			GeometryCollection[] polyCollections = new GeometryCollection[16];
-			for (int i = 0; i < 16; i++) {
-				if (polyMultimap.get(i).size() > 0) {
-					Polygon[] polyArray = new Polygon[polyMultimap.get(i).size()];
-					polyCollections[i] = geoFactory
-							.createGeometryCollection((Polygon[]) (polyMultimap.get(i).toArray(polyArray)));
-					Geometry union = polyCollections[i].buffer(geometryBuffer);
+				Float color = new Float(v);
 
-					union = TopologyPreservingSimplifier.simplify(union, geometrySimplify);
-
-					logger.debug("Geometry Type:" + union.getGeometryType());
-
-					polyCollections[i] = null;
-
-					polyMultimap.get(i).clear();
-					// Geometry union = (Geometry)polyCollections[i];
-
-					Integer color = new Integer(i);
-
-					// create the feature
-					SimpleFeature feature = SimpleFeatureBuilder.build(schema, new Object[] { (Geometry) union, color },
-							new Integer(geoIndex++).toString());
-
-					features.add(feature);
+				Float value = color;
+				if (configuration.getBoolean(COLOR_MODE, true)) {
+					value = color * 5;
 				}
 
-			}
+				if (configuration.getBoolean(REDUCE_POLYGONS, true)) {
+					logger.debug("REDUCING POLYGONS!");
 
-		} else {
+					if (polyMultimap.get(v).size() > 0) {
+						Polygon[] polyArray = new Polygon[polyMultimap.get(v).size()];
 
-			for (int i = 0; i < 16; i++) {
-				if (polyMultimap.get(i).size() > 0) {
+						GeometryCollection polyCollection = geoFactory
+								.createGeometryCollection(polyMultimap.get(v).toArray(polyArray));
 
-					for (Polygon poly : polyMultimap.get(i)) {
-						Integer color = new Integer(i);
+						Geometry union = polyCollection.buffer(geometryBuffer);
 
-						// create the feature
-						SimpleFeature feature = SimpleFeatureBuilder.build(schema,
-								new Object[] { (Geometry) poly, color }, new Integer(geoIndex++).toString());
+						union = TopologyPreservingSimplifier.simplify(union, geometrySimplify);
 
-						features.add(feature);
+						logger.debug("Geometry Type:" + union.getGeometryType());
+
+						// polyMultimap.get(v).clear();
+
+						if (union.getGeometryType().equalsIgnoreCase("MultiPolygon")) {
+
+							// logger.debug(union.toString());
+							if (configuration.getBoolean(MULTIPOLYGON_MODE, true)) {
+								SimpleFeature feature = SimpleFeatureBuilder.build(schema,
+										new Object[] { union, color, value }, new Integer(geoIndex++).toString());
+
+								features.add(feature);
+							} else {
+
+								MultiPolygon multiPolygon = (MultiPolygon) union;
+								for (int j = 0; j < multiPolygon.getNumGeometries(); j++) {
+
+									// create the feature
+									SimpleFeature feature = SimpleFeatureBuilder.build(schema,
+											new Object[] { (Geometry) multiPolygon.getGeometryN(j), color, value },
+											new Integer(geoIndex++).toString());
+
+									features.add(feature);
+
+									// logger.debug(feature.toString());
+
+								}
+							}
+
+						} else if (union.getGeometryType().equalsIgnoreCase("Polygon")) {
+
+							// create the feature
+							SimpleFeature feature = SimpleFeatureBuilder.build(schema,
+									new Object[] { (Geometry) union, color, value },
+									new Integer(geoIndex++).toString());
+
+							features.add(feature);
+
+							// logger.debug(feature.toString());
+						}
 
 					}
 
 				}
-			}
 
+				else {
+
+					for (Polygon poly : polyMultimap.get(v)) {
+
+						SimpleFeature feature = SimpleFeatureBuilder.build(schema, new Object[] { poly, color, value },
+								new Integer(geoIndex++).toString());
+
+						features.add(feature);
+
+						logger.debug(feature.toString());
+					}
+
+				}
+			}
 		}
 
 	}
@@ -325,7 +371,11 @@ public class DecodeRadial implements IRadialDecoder {
 			filter.setAzimuthRange(configuration.getDouble(MIN_AZIMUTH), configuration.getDouble(MAX_AZIMUTH));
 		}
 
-		reducePolys = configuration.getBoolean(REDUCE_POLYGONS, true);
+		// reducePolys = configuration.getBoolean(REDUCE_POLYGONS, true);
+
+		// colorMode = configuration.getBoolean(COLOR_MODE, true);
+
+		// multiPolygonMode = configuration.getBoolean(MULTIPOLYGON_MODE, true);
 
 		crs = MQProjections.getInstance().getCoordinateSystemByProjectionType(
 				CinradXUtils.getProjectionByName(configuration.getString(CRS_TARGET, "WGS84").trim()),
@@ -335,10 +385,14 @@ public class DecodeRadial implements IRadialDecoder {
 		geoFactory = new GeometryFactory(new PrecisionModel(configuration.getInt(GEOMETRY_FACTORY_PRECISION, 1000000)),
 				configuration.getInt(GEOMETRY_FACTORY_SRID, 0));
 
-		cinradTransform = CRS.findMathTransform(MQProjections.getInstance().getCoordinateSystemByProjectionType(
-				CinradXUtils.getProjectionByType(getICinradXHeader().getProductHeader().getProjectionType()),
-				getICinradXHeader().getCommonBlocks().getSiteConfiguration().getLongitude(),
-				getICinradXHeader().getCommonBlocks().getSiteConfiguration().getLatitude()), crs);
+		cinradTransform = CRS
+				.findMathTransform(
+						MQProjections.getInstance().getCoordinateSystemByProjectionType(
+								CinradXUtils.getProjectionByType(
+										getICinradXHeader().getProductHeader().getProjectionType()),
+								getICinradXHeader().getCommonBlocks().getSiteConfiguration().getLongitude(),
+								getICinradXHeader().getCommonBlocks().getSiteConfiguration().getLatitude()),
+						crs);
 
 	}
 

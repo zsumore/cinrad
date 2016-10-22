@@ -88,7 +88,11 @@ public class DecodeRadialTest {
 		decode.setDecodeHint(IRadialDecoder.RADIAL_MIN_VALUE, 20);
 
 		// 是否减少多边形，如果设为true，会把颜色等级相同而且相邻的多边形合并为一个新的多边形，但是速度会变慢
-		decode.setDecodeHint(IRadialDecoder.REDUCE_POLYGONS, false);
+		decode.setDecodeHint(IRadialDecoder.REDUCE_POLYGONS, true);
+		boolean colorMode = true;
+		decode.setDecodeHint(IRadialDecoder.COLOR_MODE, colorMode);
+
+		decode.setDecodeHint(IRadialDecoder.MULTIPOLYGON_MODE, true);
 		// decode.setDecodeHint("reducePolygons", true);
 		// System.out.println(System.currentTimeMillis());
 		decode.decodeData(true);
@@ -105,7 +109,7 @@ public class DecodeRadialTest {
 				MQProjections.getInstance().getWGS84CoordinateSystem()));
 
 		Color[] colors = CinradColorFactory.getColors(CindarProducts.BASE_REFLECTIVITY_19);
-		context.addLayer(new FeatureLayer(decode.getFeatures(), createPolygonStyle(colors)));
+		context.addLayer(new FeatureLayer(decode.getFeatures(), createPolygonStyle(colors, colorMode)));
 		// context.addLayer(decode.getFeatures(), createPolygonStyle(colors));
 
 		GTRenderer draw = new StreamingRenderer();
@@ -118,9 +122,11 @@ public class DecodeRadialTest {
 		mapFrame.getMapPane().reset();
 		mapFrame.setVisible(true);
 
+		System.out.println(decode.getFeatures().size());
+
 	}
 
-	private static Style createPolygonStyle(Color[] colors) throws CQLException {
+	private static Style createPolygonStyle(Color[] colors, boolean colorMode) throws CQLException {
 		StyleFactory styleFactory = CommonFactoryFinder.getStyleFactory(null);
 		FilterFactory filterFactory = CommonFactoryFinder.getFilterFactory(null);
 
@@ -128,7 +134,16 @@ public class DecodeRadialTest {
 		Rule[] rules = new Rule[size];
 		for (int i = 0; i < size; i++) {
 			Rule r = createRule(styleFactory, filterFactory, colors[i]);
-			r.setFilter(CQL.toFilter("colorIndex = " + i));
+			if (colorMode) {
+
+				r.setFilter(CQL.toFilter("colorIndex = " + i));
+			} else {
+				StringBuffer buffer = new StringBuffer("colorIndex >= " + i * 5);
+				if (!(i == size - 1)) {
+					buffer.append(" and colorIndex < " + (i + 1) * 5);
+				}
+				r.setFilter(CQL.toFilter(buffer.toString()));
+			}
 			rules[i] = r;
 		}
 		FeatureTypeStyle fts = styleFactory.createFeatureTypeStyle(rules);

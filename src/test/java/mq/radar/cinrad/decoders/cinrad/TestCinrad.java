@@ -60,7 +60,9 @@ public class TestCinrad {
 
 		String file80 = "data/20120709.000000.00.80.200";
 		String file53 = "data/53/20150509.000600.01.53.200";
-		File file = new File(file119);
+		
+		String file99="data/cinrad/Z_RADR_I_Z9200_20161024125400_P_DOR_SA_R_10_230_24.200.bin";
+		File file = new File(file99);
 		CinradHeader header = new DecodeCinradHeader();
 		header.decodeHeader(file.toURI().toURL());
 		System.out.println(header.toString());

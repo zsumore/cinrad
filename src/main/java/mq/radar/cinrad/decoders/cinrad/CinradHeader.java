@@ -29,13 +29,15 @@ public interface CinradHeader {
 	 * @return short
 	 */
 	public short getRadarStationCode();
-	
+
 	/**
 	 * 雷达站代号
 	 * 
 	 * @return short
 	 */
-	public int getRadarStationID();
+	public Integer getRadarStationID();
+
+	public void setRadarStationID(int sid);
 
 	/**
 	 * 接收站代号
@@ -106,7 +108,7 @@ public interface CinradHeader {
 	 * @return short
 	 */
 	public short getElevNumber();
-	
+
 	public void setElevNumber(short elev);
 
 	/**
@@ -175,7 +177,7 @@ public interface CinradHeader {
 	 * 
 	 * @return The bounds value
 	 */
-	public Envelope getCinradBounds() ;
+	public Envelope getCinradBounds();
 
 	/**
 	 * Gets lon, lat location of Radar site as Coordinate

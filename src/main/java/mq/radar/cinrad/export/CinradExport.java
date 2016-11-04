@@ -10,7 +10,6 @@ import mq.radar.cinrad.decoders.cinrad.CindarDecoder;
 
 import org.geotools.data.FeatureWriter;
 import org.geotools.data.Transaction;
-import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.opengis.feature.IllegalAttributeException;
@@ -27,7 +26,7 @@ public class CinradExport {
 	 *            Destination file
 	 * @param decoder
 	 *            Alphanumeric Nexrad decoder
-	 */
+	 
 	public static void saveShapefile(File outFile, CindarDecoder decoder)
 			throws MQExportException, MQExportNoDataException, IOException,
 			IllegalAttributeException {
@@ -61,6 +60,7 @@ public class CinradExport {
 		bw.write(prj);
 		bw.close();
 	}
+	*/
 
 	/**
 	 * Save Cinrad Alphanumeric data to ESRI Line Shapefile with additional .prj
@@ -71,7 +71,7 @@ public class CinradExport {
 	 *            Destination file
 	 * @param decoder
 	 *            Alphanumeric Nexrad decoder
-	 */
+	
 	public static void saveLineShapefile(File outFile, CindarDecoder decoder)
 			throws MQExportException, MQExportNoDataException, IOException,
 			IllegalAttributeException {
@@ -105,6 +105,7 @@ public class CinradExport {
 			bw.close();
 		}
 	}
+	 */
 
 	/**
 	 * Save Cinrad Alphanumeric data to Well-Known Text with additional .prj
@@ -115,7 +116,7 @@ public class CinradExport {
 	 *            Destination file
 	 * @param decoder
 	 *            Alphanumeric Nexrad decoder
-	 */
+	 
 	public static void saveLineWKT(File outFile, CindarDecoder decoder)
 			throws MQExportException, MQExportNoDataException, IOException,
 			IllegalAttributeException {
@@ -145,6 +146,7 @@ public class CinradExport {
 		}
 
 	}
+	
 
 	public static void saveWKT(File outFile, CindarDecoder decoder)
 			throws MQExportException, MQExportNoDataException, IOException,
@@ -169,7 +171,7 @@ public class CinradExport {
 		}
 
 	}
-
+*/
 	/**
 	 * Save Nexrad Alphanumeric data to Comma-delimited file
 	 * 
@@ -177,7 +179,7 @@ public class CinradExport {
 	 *            Destination file
 	 * @param decoder
 	 *            Alphanumeric Nexrad decoder
-	 */
+	 
 	public static void saveCSV(File outFile, CindarDecoder decoder)
 			throws MQExportException, MQExportNoDataException, IOException,
 			IllegalAttributeException {
@@ -185,6 +187,7 @@ public class CinradExport {
 		DecimalFormat format = new DecimalFormat("0.000");
 		saveCSV(outFile, decoder, format);
 	}
+	*/
 
 	/**
 	 * Save Nexrad Alphanumeric data to Comma-delimited file
@@ -195,7 +198,7 @@ public class CinradExport {
 	 *            Alphanumeric Nexrad decoder
 	 * @param format
 	 *            Output text format for numeric data
-	 */
+	
 	public static void saveCSV(File outFile, CindarDecoder decoder,
 			DecimalFormat format) throws MQExportException,
 			MQExportNoDataException, IOException, IllegalAttributeException {
@@ -257,5 +260,5 @@ public class CinradExport {
 		bw.close();
 
 	}
-
+ */
 }

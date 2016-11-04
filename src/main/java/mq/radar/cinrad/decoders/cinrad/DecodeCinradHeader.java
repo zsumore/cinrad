@@ -275,20 +275,21 @@ public class DecodeCinradHeader implements CinradHeader {
 				// applicable for all products but the 8-bit ones
 				InMemoryRandomAccessFile bf = new InMemoryRandomAccessFile("Data Threshold", dataThresholdBytes);
 				for (int i = 0; i < 16; i++) {
-					//TODO
+					// TODO
 					if (this.productCode == 19) {
-						dataThresholdInfo[i] = bf.readUnsignedByte() ;
-						dataThresholdValue[i] = bf.readUnsignedByte() ;
+						dataThresholdInfo[i] = bf.readUnsignedByte();
+						dataThresholdValue[i] = bf.readUnsignedByte();
 					} else {
 						dataThresholdInfo[i] = bf.readUnsignedByte();
 						dataThresholdValue[i] = bf.readUnsignedByte();
-					};
-					System.out.println(this.productCode);
-					System.out.println("-----------------------------");
-					System.out.println(dataThresholdInfo[i]);
-					System.out.println(dataThresholdValue[i]);
-					System.out.println("-----------------------------");
-					
+					}
+					;
+					//System.out.println(this.productCode);
+					//System.out.println("-----------------------------");
+					//System.out.println(dataThresholdInfo[i]);
+					//System.out.println(dataThresholdValue[i]);
+					//System.out.println("-----------------------------");
+
 				}
 				bf.close();
 
@@ -560,7 +561,7 @@ public class DecodeCinradHeader implements CinradHeader {
 		return dataThresholdString[index];
 	}
 
-	public int getRadarStationID() {
+	public Integer getRadarStationID() {
 		return sid;
 	}
 
@@ -568,6 +569,12 @@ public class DecodeCinradHeader implements CinradHeader {
 	public void setElevNumber(short elev) {
 
 		elevNumber = elev;
+	}
+
+	@Override
+	public void setRadarStationID(int sid) {
+		this.sid = sid;
+
 	}
 
 }

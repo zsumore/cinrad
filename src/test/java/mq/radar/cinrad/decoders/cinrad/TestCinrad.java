@@ -61,7 +61,8 @@ public class TestCinrad {
 		String file80 = "data/20120709.000000.00.80.200";
 		String file53 = "data/53/20150509.000600.01.53.200";
 		
-		String file99="data/cinrad/Z_RADR_I_Z9200_20161024125400_P_DOR_SA_R_10_230_24.200.bin";
+		String file99="data/cinrad/Z_RADR_I_Z9200_20161102141800_P_DOR_SA_V_10_230_15.200.bin";
+		String file758="data/cinrad/Z_RADR_I_Z9758_20161101030000_P_DOR_SA_R_20_460_5.758.bin";
 		File file = new File(file99);
 		CinradHeader header = new DecodeCinradHeader();
 		header.decodeHeader(file.toURI().toURL());
@@ -79,7 +80,7 @@ public class TestCinrad {
 		decode.setDecodeHint("cinradFilter", filter);
 
 		// 是否减少多边形，如果设为true，会把颜色等级相同而且相邻的多边形合并为一个新的多边形，但是速度会变慢
-		decode.setDecodeHint("reducePolygons", false);
+		decode.setDecodeHint("reducePolygons", true);
 		// decode.setDecodeHint("reducePolygons", true);
 		// System.out.println(System.currentTimeMillis());
 		decode.decodeData();

@@ -46,7 +46,8 @@ import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
 public class DecodeStreamingRadial extends BaseCindarDecoder {
 	private final Logger logger = LoggerFactory.getLogger(DecodeStreamingRadial.class);
 
-	private final double geometryBuffer = 0.00006;
+	// private final double geometryBuffer = 0.00006;
+	private final double geometryBuffer = 0.0;
 	private final double geometrySimplify = 0.0001;
 
 	private Map<Integer, Vector<Polygon>> polyVector;
@@ -123,6 +124,13 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 		return supplementalData;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * mq.radar.cinrad.decoders.cinrad.BaseCindarDecoder#decodeData(mq.radar.
+	 * cinrad.decoders.StreamingProcess[], boolean)
+	 */
 	@Override
 	public void decodeData(StreamingProcess[] processArray, boolean autoClose) throws DecodeException, IOException {
 
@@ -141,14 +149,14 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 			logger.error("Exception", e);
 		}
 		this.nxfilter = (MQFilter) decodeHints.get("cinradFilter");
-		boolean reducePolys = (Boolean) decodeHints.get("reducePolygons");
+		boolean reducePolys = (Boolean) decodeHints.getOrDefault("reducePolygons", true);
 
 		event = new DataDecodeEvent(this);
 
 		// Start decode
 		// --------------
 		for (int i = 0; i < listeners.size(); i++) {
-			System.out.println(listeners.size());
+			// System.out.println(listeners.size());
 			event.setProgress(0);
 			listeners.get(i).decodeStarted(event);
 		}
@@ -207,9 +215,16 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 				for (int i = 0; i < 16; i++) {
 					if (polyVector.get(i).size() > 0) {
 						Polygon[] polyArray = new Polygon[polyVector.get(i).size()];
+
+						logger.debug("-------------------before---size:{}", polyArray.length);
 						polyCollections[i] = geoFactory
 								.createGeometryCollection((Polygon[]) (polyVector.get(i).toArray(polyArray)));
 						Geometry union = polyCollections[i].buffer(geometryBuffer);
+
+						if (union instanceof MultiPolygon) {
+							logger.debug("-----------------after-----size:{}",
+									((MultiPolygon) union).getNumGeometries());
+						}
 
 						union = TopologyPreservingSimplifier.simplify(union, geometrySimplify);
 
@@ -222,22 +237,35 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 						Integer color = new Integer(i);
 
 						if (union.getGeometryType().equalsIgnoreCase("MultiPolygon")) {
-							MultiPolygon multiPolygon = (MultiPolygon) union;
+							// MultiPolygon multiPolygon = (MultiPolygon) union;
 
-							for (int j = 0; j < multiPolygon.getNumGeometries(); j++) {
-
-								try {
-									// create the feature
-									SimpleFeature feature = SimpleFeatureBuilder.build(schema,
-											new Object[] { (Geometry) multiPolygon.getGeometryN(j), value, color },
-											new Integer(geoIndex++).toString());
-									for (int n = 0; n < processArray.length; n++) {
-										processArray[n].addFeature(feature);
-									}
-								} catch (Exception e) {
-									e.printStackTrace();
+							try {
+								// create the feature
+								SimpleFeature feature = SimpleFeatureBuilder.build(schema,
+										new Object[] { (Geometry) union, value, color },
+										new Integer(geoIndex++).toString());
+								for (int n = 0; n < processArray.length; n++) {
+									processArray[n].addFeature(feature);
 								}
+							} catch (Exception e) {
+
+								logger.error(e.getMessage());
+								e.printStackTrace();
 							}
+
+							/*
+							 * for (int j = 0; j <
+							 * multiPolygon.getNumGeometries(); j++) {
+							 * 
+							 * try { // create the feature SimpleFeature feature
+							 * = SimpleFeatureBuilder.build(schema, new Object[]
+							 * { (Geometry) multiPolygon.getGeometryN(j), value,
+							 * color }, new Integer(geoIndex++).toString()); for
+							 * (int n = 0; n < processArray.length; n++) {
+							 * processArray[n].addFeature(feature); } } catch
+							 * (Exception e) { logger.error(e.getMessage());
+							 * e.printStackTrace(); } }
+							 */
 						} else if (union.getGeometryType().equalsIgnoreCase("Polygon")) {
 							try {
 								// create the feature
@@ -248,6 +276,8 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 									processArray[n].addFeature(feature);
 								}
 							} catch (Exception e) {
+
+								logger.error(e.getMessage());
 								e.printStackTrace();
 							}
 						}
@@ -323,7 +353,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 	}
 
 	private void decodeRaster() throws IOException, TransformException {
-		logger.info("Decode Raster Starting ");
+		logger.debug("Decode Raster Starting ");
 		// rewind
 		f.seek(0);
 
@@ -336,7 +366,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 			;
 		}
 
-		logger.info("FILE POS: " + f.getFilePointer());
+		logger.debug("FILE POS: " + f.getFilePointer());
 
 		short blockID = f.readShort();
 		logger.debug("blockID: " + blockID);
@@ -379,9 +409,11 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 		}
 
 		String packetCodeHex = Hex.toHex(dataHeader[0]);
-		logger.debug("RASTER: dataHeader[0] HEX: " + packetCodeHex);
-		logger.debug("RASTER: dataHeader[1] HEX: " + Hex.toHex(dataHeader[1]));
-		logger.debug("RASTER: dataHeader[2] HEX: " + Hex.toHex(dataHeader[2]));
+		// logger.debug("RASTER: dataHeader[0] HEX: " + packetCodeHex);
+		// logger.debug("RASTER: dataHeader[1] HEX: " +
+		// Hex.toHex(dataHeader[1]));
+		// logger.debug("RASTER: dataHeader[2] HEX: " +
+		// Hex.toHex(dataHeader[2]));
 
 		if (logger.isDebugEnabled()) {
 			for (int i = 3; i < 11; i++) {
@@ -456,8 +488,8 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 				// subtracting
 				colorCode = (int) data - (numBins << 4);
 
-				System.out.println("------------------colorCode-------------------------");
-				System.out.println(colorCode);
+				// System.out.println("------------------colorCode-------------------------");
+				// System.out.println(colorCode);
 
 				boolean colorCodeTest;
 				// Check category filter from NexradFilter
@@ -557,7 +589,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 
 					} catch (Exception e) {
 						logger.error("Exception: " + e);
-						e.printStackTrace();
+						// e.printStackTrace();
 					}
 
 					// y+=1000000; // END LOOP AFTER DRAWING ONE ROW
@@ -650,7 +682,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 			binSpacing *= 2;
 		}
 
-		logger.info("------------binSpacing:{}", binSpacing);
+		logger.debug("------------binSpacing:{}", binSpacing);
 
 		// if (true) return (CalcNexradExtent.getNexradExtent(header));
 

@@ -203,8 +203,9 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 			}
 
 			// logger.fine("======== DECODE DATA 2 =========");
-			if (autoClose)
-				f.close();
+			if (autoClose) {
+				header.close();
+			}
 			// Close connection;
 
 			if (reducePolys) {

@@ -24,7 +24,7 @@ public class DecodeCinradHeader implements CinradHeader {
 	private final Logger logger = LoggerFactory.getLogger(DecodeCinradHeader.class);
 
 	private boolean validFile = false;
-	private String fileName = "";
+	//private String fileName = "";
 	private short productCode;
 	private int fileSize;
 	private short radarStationCode;
@@ -170,7 +170,7 @@ public class DecodeCinradHeader implements CinradHeader {
 
 			}
 			raf.order(ucar.unidata.io.RandomAccessFile.BIG_ENDIAN);
-			fileName = raf.getLocation();
+			//fileName = raf.getLocation();
 
 		} catch (Exception e) {
 			logger.error("While decode Cinrad file Header Occurred", e);
@@ -196,6 +196,7 @@ public class DecodeCinradHeader implements CinradHeader {
 
 			// close file - we will now use in-memory data
 			raf.close();
+			raf = null;
 
 			f = new ucar.unidata.io.InMemoryRandomAccessFile("Cinrad DATA", data);
 			f.order(ucar.unidata.io.RandomAccessFile.BIG_ENDIAN);
@@ -284,11 +285,11 @@ public class DecodeCinradHeader implements CinradHeader {
 						dataThresholdValue[i] = bf.readUnsignedByte();
 					}
 					;
-					//System.out.println(this.productCode);
-					//System.out.println("-----------------------------");
-					//System.out.println(dataThresholdInfo[i]);
-					//System.out.println(dataThresholdValue[i]);
-					//System.out.println("-----------------------------");
+					// System.out.println(this.productCode);
+					// System.out.println("-----------------------------");
+					// System.out.println(dataThresholdInfo[i]);
+					// System.out.println(dataThresholdValue[i]);
+					// System.out.println("-----------------------------");
 
 				}
 				bf.close();
@@ -335,7 +336,7 @@ public class DecodeCinradHeader implements CinradHeader {
 
 				return;
 			} else {
-				logger.info("Cinrad File:{} is not a valid file!", fileName);
+				logger.info("Cinrad File: is not a valid file!");
 				return;
 			}
 		} catch (Exception e) {
@@ -498,7 +499,9 @@ public class DecodeCinradHeader implements CinradHeader {
 
 	public void close() {
 		try {
+			f.flush();
 			f.close();
+			f = null;
 		} catch (Exception ee) {
 
 			logger.error("Exception:{}", ee);
@@ -510,7 +513,7 @@ public class DecodeCinradHeader implements CinradHeader {
 		if (validFile) {
 			String breakLine = "\n";
 			StringBuffer buffer = new StringBuffer();
-			buffer.append("Cindar File: ").append(fileName).append(breakLine);
+			buffer.append("Cindar File: ").append(breakLine);
 			buffer.append("Product Code: ").append(productCode).append(breakLine);
 			buffer.append("Scan Datetime: ").append(CinradUtils.datetime.format(scanCalendar.getTime()))
 					.append(breakLine);

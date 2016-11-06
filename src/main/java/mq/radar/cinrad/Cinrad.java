@@ -117,6 +117,17 @@ public class Cinrad {
 
 	}
 
+	public void close() {
+		if (null != header) {
+			header.close();
+			header = null;
+		}
+		if (null != decoder) {
+			decoder = null;
+		}
+
+	}
+
 	public CinradHeader getHeader() {
 		return header;
 	}

@@ -123,6 +123,7 @@ public class Cinrad {
 			header = null;
 		}
 		if (null != decoder) {
+			decoder.close();
 			decoder = null;
 		}
 

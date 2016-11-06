@@ -27,8 +27,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
 public class BaseCindarDecoder implements CindarDecoder {
-	private final Logger logger = LoggerFactory
-			.getLogger(BaseCindarDecoder.class);
+	private final Logger logger = LoggerFactory.getLogger(BaseCindarDecoder.class);
 	protected String[] metaLabelString = null;
 	protected DefaultFeatureCollection features = null;
 	protected DefaultFeatureCollection lineFeatures = null;
@@ -54,8 +53,7 @@ public class BaseCindarDecoder implements CindarDecoder {
 	 * @throws IOException
 	 * @throws FactoryException
 	 */
-	public BaseCindarDecoder(CinradHeader header) throws DecodeException,
-			IOException, FactoryException {
+	public BaseCindarDecoder(CinradHeader header) throws DecodeException, IOException, FactoryException {
 		this.header = header;
 		Envelope envelope = null;
 		try {
@@ -69,8 +67,7 @@ public class BaseCindarDecoder implements CindarDecoder {
 		wsrBounds = envelope;
 		metaLabelString = new String[3];
 		supplementalData = new String[2];
-		datetime = CinradUtils.yyyyMMddHHmmss.format(header.getScanCalendar()
-				.getTime());
+		datetime = CinradUtils.yyyyMMddHHmmss.format(header.getScanCalendar().getTime());
 		// crs =
 		// MQProjections.getInstance().getRadarCoordinateSystem(this.header);
 		crs = MQProjections.getInstance().getWGS84CoordinateSystem();
@@ -90,14 +87,12 @@ public class BaseCindarDecoder implements CindarDecoder {
 		features.clear();
 
 		StreamingProcess process = new StreamingProcess() {
-			public void addFeature(SimpleFeature feature)
-					throws StreamingProcessException {
+			public void addFeature(SimpleFeature feature) throws StreamingProcessException {
 				features.add(feature);
 			}
 
 			public void close() throws StreamingProcessException {
-				logger.info("STREAMING PROCESS close() ::: features.size() = "
-						+ features.size());
+				logger.info("STREAMING PROCESS close() ::: features.size() = " + features.size());
 			}
 		};
 
@@ -109,15 +104,12 @@ public class BaseCindarDecoder implements CindarDecoder {
 		return features;
 	}
 
-	public void decodeData(StreamingProcess[] processArray, boolean autoClose)
-			throws DecodeException, IOException {
+	public void decodeData(StreamingProcess[] processArray, boolean autoClose) throws DecodeException, IOException {
 
 	}
 
-	public void setDecodeHint(String hintKey, Object hintValue)
-			throws DecodeHintNotSupportedException {
-		throw new DecodeHintNotSupportedException(decoderName, hintKey,
-				decodeHints);
+	public void setDecodeHint(String hintKey, Object hintValue) throws DecodeHintNotSupportedException {
+		throw new DecodeHintNotSupportedException(decoderName, hintKey, decodeHints);
 
 	}
 
@@ -125,8 +117,7 @@ public class BaseCindarDecoder implements CindarDecoder {
 		return new SimpleFeatureType[] { schema };
 	}
 
-	public void decodeData(StreamingProcess[] streamingProcessArray)
-			throws DecodeException, IOException {
+	public void decodeData(StreamingProcess[] streamingProcessArray) throws DecodeException, IOException {
 		decodeData(streamingProcessArray, true);
 	}
 
@@ -161,6 +152,17 @@ public class BaseCindarDecoder implements CindarDecoder {
 	public CoordinateReferenceSystem getCRS() {
 
 		return crs;
+	}
+
+	@Override
+	public void close() {
+
+		if (null != features) {
+			features.clear();
+		}
+		if (null != lineFeatures) {
+			lineFeatures.clear();
+		}
 	}
 
 }

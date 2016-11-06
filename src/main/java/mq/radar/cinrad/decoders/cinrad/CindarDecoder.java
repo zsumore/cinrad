@@ -19,5 +19,7 @@ public interface CindarDecoder extends StreamingRadialDecoder {
 	public String getDefaultSymbol();
 	
 	public CoordinateReferenceSystem getCRS();
+	
+	public void close();
 
 }

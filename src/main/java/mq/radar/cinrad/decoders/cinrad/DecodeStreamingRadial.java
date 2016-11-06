@@ -324,6 +324,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 
 			try {
 				f.close();
+				f = null;
 			} catch (Exception eee) {
 				e.printStackTrace();
 			}
@@ -409,7 +410,7 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 			dataHeader[i] = f.readShort();
 		}
 
-		String packetCodeHex = Hex.toHex(dataHeader[0]);
+		// String packetCodeHex = Hex.toHex(dataHeader[0]);
 		// logger.debug("RASTER: dataHeader[0] HEX: " + packetCodeHex);
 		// logger.debug("RASTER: dataHeader[1] HEX: " +
 		// Hex.toHex(dataHeader[1]));
@@ -975,6 +976,21 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 		}
 		decodeHints.put(hintKey, hintValue);
 
+	}
+
+	@Override
+	public void close() {
+
+		super.close();
+		if (null != polyVector) {
+			polyVector.clear();
+		}
+		if (null != coordinates) {
+			coordinates.clear();
+		}
+		if (null != listeners) {
+			listeners.clear();
+		}
 	}
 
 }

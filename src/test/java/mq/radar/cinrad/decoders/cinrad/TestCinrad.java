@@ -63,7 +63,7 @@ public class TestCinrad {
 		
 		String file99="data/cinrad/Z_RADR_I_Z9200_20161102141800_P_DOR_SA_V_10_230_15.200.bin";
 		String file758="data/cinrad/Z_RADR_I_Z9758_20161101030000_P_DOR_SA_R_20_460_5.758.bin";
-		File file = new File(file99);
+		File file = new File(file19);
 		CinradHeader header = new DecodeCinradHeader();
 		header.decodeHeader(file.toURI().toURL());
 		System.out.println(header.toString());
@@ -84,7 +84,8 @@ public class TestCinrad {
 		// decode.setDecodeHint("reducePolygons", true);
 		// System.out.println(System.currentTimeMillis());
 		decode.decodeData();
-		// System.out.println(System.currentTimeMillis());
+		System.out.println("--------------"+decode.getFeatures().size());
+		System.out.println(decode.getFeatures().features().next().getDefaultGeometry());
 
 		MapContent context = new MapContent();
 		context.setTitle("Quickstart");

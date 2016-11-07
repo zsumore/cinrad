@@ -1,5 +1,6 @@
 package mq.radar.cinrad.decoders.cinrad;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -24,7 +25,7 @@ public class DecodeCinradHeader implements CinradHeader {
 	private final Logger logger = LoggerFactory.getLogger(DecodeCinradHeader.class);
 
 	private boolean validFile = false;
-	//private String fileName = "";
+	// private String fileName = "";
 	private short productCode;
 	private int fileSize;
 	private short radarStationCode;
@@ -170,7 +171,7 @@ public class DecodeCinradHeader implements CinradHeader {
 
 			}
 			raf.order(ucar.unidata.io.RandomAccessFile.BIG_ENDIAN);
-			//fileName = raf.getLocation();
+			// fileName = raf.getLocation();
 
 		} catch (Exception e) {
 			logger.error("While decode Cinrad file Header Occurred", e);
@@ -498,13 +499,14 @@ public class DecodeCinradHeader implements CinradHeader {
 	}
 
 	public void close() {
-		try {
-			f.flush();
-			f.close();
-			f = null;
-		} catch (Exception ee) {
-
-			logger.error("Exception:{}", ee);
+		if (f != null) {
+			try {
+				f.flush();
+				f.close();
+				f = null;
+			} catch (IOException e) {
+				logger.error("Exception:{}", e);
+			}
 		}
 	}
 

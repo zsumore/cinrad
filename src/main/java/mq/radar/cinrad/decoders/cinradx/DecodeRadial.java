@@ -440,4 +440,10 @@ public class DecodeRadial implements IRadialDecoder {
 		return this.decodeCinradXHeader.getICinradXHeader();
 	}
 
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
+
+	}
+
 }

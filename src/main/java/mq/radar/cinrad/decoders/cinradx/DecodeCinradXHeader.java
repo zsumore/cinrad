@@ -1,5 +1,6 @@
 package mq.radar.cinrad.decoders.cinradx;
 
+import java.io.IOException;
 import java.net.URL;
 
 import org.slf4j.Logger;
@@ -134,6 +135,21 @@ public class DecodeCinradXHeader implements IDecodeCinradXHeader {
 	public ICinradXHeader getICinradXHeader() {
 
 		return this.cinradXheader;
+	}
+
+	@Override
+	public void close() {
+		if (f != null) {
+
+			try {
+				f.flush();
+				f.close();
+				f = null;
+			} catch (IOException e) {
+				logger.error("Exception:{}", e);
+			}
+
+		}
 	}
 
 }

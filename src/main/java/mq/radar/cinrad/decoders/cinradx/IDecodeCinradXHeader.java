@@ -25,5 +25,7 @@ public interface IDecodeCinradXHeader {
 	Long getCinradXHeaderLength();
 	
 	ICinradXHeader getICinradXHeader();
+	
+	void close();
 
 }

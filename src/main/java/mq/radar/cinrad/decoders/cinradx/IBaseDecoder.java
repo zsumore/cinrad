@@ -10,7 +10,6 @@ import mq.radar.cinrad.decoders.DecodeException;
 import mq.radar.cinrad.decoders.DecodeHintNotSupportedException;
 
 public interface IBaseDecoder {
-	
 
 	/**
 	 * The FeatureTypes or 'schemas' used for this decoder. This represents the
@@ -20,7 +19,6 @@ public interface IBaseDecoder {
 	 * to handle different FeatureTypes.
 	 */
 	public SimpleFeatureType[] getFeatureTypes();
-	
 
 	/**
 	 * Decode the data
@@ -32,5 +30,7 @@ public interface IBaseDecoder {
 	public void setDecodeHintsConfig(Configuration conf);
 
 	public void setDecodeHint(String hintKey, Object hintValue) throws DecodeHintNotSupportedException;
+
+	public void close();
 
 }

@@ -4,20 +4,14 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.ConfigurationUtils;
-import org.apache.commons.configuration.PropertiesConfiguration;
 import org.geotools.data.shapefile.shp.JTSUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.geotools.referencing.CRS;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.slf4j.Logger;
@@ -28,64 +22,28 @@ import com.google.common.collect.Multimap;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
 
-import mq.radar.cinrad.MQProjections;
-import mq.radar.cinrad.MQXFilter;
 import mq.radar.cinrad.decoders.DecodeException;
-import mq.radar.cinrad.decoders.DecodeHintNotSupportedException;
 
-public class DecodeRadial implements IRadialDecoder {
+public class DecodeRadial extends BaseDecoder {
 
 	private final Logger logger = LoggerFactory.getLogger(DecodeRadial.class);
 
-	private IDecodeCinradXHeader decodeCinradXHeader;
-	private Configuration configuration;
-
-	private double geometryBuffer = 0.000001;
-	private double geometrySimplify = 0.000001;
-
 	private Multimap<Float, Polygon> polyMultimap;
-
-	protected MQXFilter filter = new MQXFilter();
 
 	private RadialDataBlock radialDataBlock;
 
-	protected SimpleFeatureType schema = null;
-
-	protected DefaultFeatureCollection features = null;
-
-	protected MathTransform cinradTransform = null;
-
-	protected CoordinateReferenceSystem crs = null;
-
-	protected GeometryFactory geoFactory = null;
-
-	// private boolean reducePolys = true;
-
-	// private boolean colorMode = true;
-
-	// private boolean multiPolygonMode = true;
+	private DefaultFeatureCollection features = null;
 
 	private int geoIndex;
 
 	public DecodeRadial(IDecodeCinradXHeader decodeHeader) throws ConfigurationException {
-		super();
-		this.decodeCinradXHeader = decodeHeader;
+		super(decodeHeader);
 
-		configuration = new PropertiesConfiguration(
-				getClass().getClassLoader().getResource(CinradXUtils.DEFAULT_DECODE_CONFIG_FILE));
-
-	}
-
-	@Override
-	public SimpleFeatureType[] getFeatureTypes() {
-		return new SimpleFeatureType[] { schema };
 	}
 
 	@Override
@@ -285,13 +243,24 @@ public class DecodeRadial implements IRadialDecoder {
 							}
 
 						} else if (union.getGeometryType().equalsIgnoreCase("Polygon")) {
+							if (configuration.getBoolean(MULTIPOLYGON_MODE, true)) {
+								// create the feature
+								Polygon[] pa = { (Polygon) union };
+								SimpleFeature feature = SimpleFeatureBuilder.build(schema,
+										new Object[] { (Geometry) new MultiPolygon(pa, geoFactory), color, value },
+										new Integer(geoIndex++).toString());
 
-							// create the feature
-							SimpleFeature feature = SimpleFeatureBuilder.build(schema,
-									new Object[] { (Geometry) union, color, value },
-									new Integer(geoIndex++).toString());
+								features.add(feature);
 
-							features.add(feature);
+							} else {
+
+								// create the feature
+								SimpleFeature feature = SimpleFeatureBuilder.build(schema,
+										new Object[] { (Geometry) union, color, value },
+										new Integer(geoIndex++).toString());
+
+								features.add(feature);
+							}
 
 							// logger.debug(feature.toString());
 						}
@@ -309,19 +278,13 @@ public class DecodeRadial implements IRadialDecoder {
 
 						features.add(feature);
 
-						logger.debug(feature.toString());
+						// logger.debug(feature.toString());
 					}
 
 				}
 			}
 		}
 
-	}
-
-	private boolean testValueRange(float value) {
-		if (value >= filter.getMinValue() && value <= filter.getMaxValue())
-			return true;
-		return false;
 	}
 
 	private boolean testInAzimuthRange(RadialData data, double minA, double maxA) {
@@ -354,95 +317,31 @@ public class DecodeRadial implements IRadialDecoder {
 		return false;
 	}
 
-	private void initDecodeHints() throws FactoryException {
-		if (configuration.containsKey(GEOMETRY_BUFFER)) {
-			geometryBuffer = configuration.getDouble(GEOMETRY_BUFFER);
-		}
-		if (configuration.containsKey(GEOMETRY_SIMPLIFY)) {
-			geometryBuffer = configuration.getDouble(GEOMETRY_SIMPLIFY);
-		}
-		if (configuration.containsKey(RADIAL_MIN_VALUE)) {
-			filter.setMinValue(configuration.getDouble(RADIAL_MIN_VALUE));
-		}
-		if (configuration.containsKey(RADIAL_MAX_VALUE)) {
-			filter.setMaxValue(configuration.getDouble(RADIAL_MAX_VALUE));
-		}
-		if (configuration.containsKey(MIN_AZIMUTH) && configuration.containsKey(MAX_AZIMUTH)) {
-			filter.setAzimuthRange(configuration.getDouble(MIN_AZIMUTH), configuration.getDouble(MAX_AZIMUTH));
-		}
-
-		// reducePolys = configuration.getBoolean(REDUCE_POLYGONS, true);
-
-		// colorMode = configuration.getBoolean(COLOR_MODE, true);
-
-		// multiPolygonMode = configuration.getBoolean(MULTIPOLYGON_MODE, true);
-
-		crs = MQProjections.getInstance().getCoordinateSystemByProjectionType(
-				CinradXUtils.getProjectionByName(configuration.getString(CRS_TARGET, "WGS84").trim()),
-				getICinradXHeader().getCommonBlocks().getSiteConfiguration().getLongitude(),
-				getICinradXHeader().getCommonBlocks().getSiteConfiguration().getLatitude());
-
-		geoFactory = new GeometryFactory(new PrecisionModel(configuration.getInt(GEOMETRY_FACTORY_PRECISION, 1000000)),
-				configuration.getInt(GEOMETRY_FACTORY_SRID, 0));
-
-		cinradTransform = CRS
-				.findMathTransform(
-						MQProjections.getInstance().getCoordinateSystemByProjectionType(
-								CinradXUtils.getProjectionByType(
-										getICinradXHeader().getProductHeader().getProjectionType()),
-								getICinradXHeader().getCommonBlocks().getSiteConfiguration().getLongitude(),
-								getICinradXHeader().getCommonBlocks().getSiteConfiguration().getLatitude()),
-						crs);
-
-	}
-
-	@Override
-	public void setDecodeHint(String hintKey, Object hintValue) throws DecodeHintNotSupportedException {
-		configuration.addProperty(hintKey, hintValue);
-
-	}
-
-	@Override
 	public SimpleFeatureCollection getFeatures() {
 
 		return features;
 	}
 
-	@Override
 	public MathTransform getMathTransform() {
 
 		return cinradTransform;
 	}
 
-	@Override
-	public Configuration getDecodeHintsConfig() {
-
-		return configuration;
-	}
-
-	@Override
-	public void setDecodeHintsConfig(Configuration conf) {
-		if (null != conf) {
-			ConfigurationUtils.copy(conf, configuration);
-		}
-
-	}
-
-	@Override
 	public RadialDataBlock getRadialDataBlock() {
 
 		return radialDataBlock;
 	}
 
 	@Override
-	public ICinradXHeader getICinradXHeader() {
-
-		return this.decodeCinradXHeader.getICinradXHeader();
-	}
-
-	@Override
 	public void close() {
-		// TODO Auto-generated method stub
+
+		if (null != polyMultimap) {
+			polyMultimap.clear();
+		}
+		if (null != features) {
+			features.clear();
+		}
+		radialDataBlock = null;
 
 	}
 

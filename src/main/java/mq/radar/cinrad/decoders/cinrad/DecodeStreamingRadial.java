@@ -270,8 +270,9 @@ public class DecodeStreamingRadial extends BaseCindarDecoder {
 						} else if (union.getGeometryType().equalsIgnoreCase("Polygon")) {
 							try {
 								// create the feature
+								Polygon[] pa = { (Polygon) union };
 								SimpleFeature feature = SimpleFeatureBuilder.build(schema,
-										new Object[] { (Geometry) union, value, color },
+										new Object[] { (Geometry) new MultiPolygon(pa, geoFactory), value, color },
 										new Integer(geoIndex++).toString());
 								for (int n = 0; n < processArray.length; n++) {
 									processArray[n].addFeature(feature);

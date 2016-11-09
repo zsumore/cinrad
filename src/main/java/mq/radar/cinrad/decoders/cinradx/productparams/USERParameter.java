@@ -65,6 +65,7 @@ public class USERParameter implements IProductDependentParameter {
 
 			dataInputStream.flush();
 			dataInputStream.close();
+			dataInputStream=null;
 		}
 	}
 

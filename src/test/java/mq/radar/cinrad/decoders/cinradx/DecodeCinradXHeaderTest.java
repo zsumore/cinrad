@@ -10,11 +10,11 @@ import org.junit.Test;
 
 public class DecodeCinradXHeaderTest {
 
-	String dbzf = "data/cinradx/ppi/dBZ/FSNH_20150830000024Z_PPI_01_dBZ";
+	String dbzf = "data/cinradx/ppi/dBZ/Z9757_20161021000203Z_PPI_01_dBZ";
 
-	String kdpf = "data/cinradx/ppi/KDP/FSNH_20150831000348Z_PPI_01_KDP";
+	String kdpf = "data/cinradx/ppi/KDP/Z9757_20161021235204Z_PPI_04_KDP";
 
-	String cappif = "data/cinradx/cappi/FSNH_20150831000348Z_CAPPI_00_default";
+	String cappif = "data/cinradx/cappi/Z9757_20161021080221Z_CAPPI_00_default";
 
 	DecodeCinradXHeader decodeCinradXHeader;
 
@@ -22,7 +22,7 @@ public class DecodeCinradXHeaderTest {
 	@Before
 	public void setUp() throws Exception {
 		decodeCinradXHeader = new DecodeCinradXHeader();
-		decodeCinradXHeader.decodeHeader(new File(dbzf).toURL());
+		decodeCinradXHeader.decodeHeader(new File(cappif).toURL());
 	}
 
 	@After
@@ -34,13 +34,15 @@ public class DecodeCinradXHeaderTest {
 
 	@Test
 	public void testGetCommonBlocks() {
+		
+		System.out.println(decodeCinradXHeader.getICinradXHeader().getCommonBlocks().toString());
+		System.out.println(decodeCinradXHeader.getICinradXHeader().getProductHeader().toString());
 
 		assertTrue(decodeCinradXHeader.getICinradXHeader().getCommonBlocks().getGenericHeader().getProductType() == 1);
 
 		assertTrue(decodeCinradXHeader.getICinradXHeader().getProductHeader().getProductNumber() == 1);
 
-		System.out.println(decodeCinradXHeader.getICinradXHeader().getCommonBlocks().toString());
-		System.out.println(decodeCinradXHeader.getICinradXHeader().getProductHeader().toString());
+		
 
 	}
 

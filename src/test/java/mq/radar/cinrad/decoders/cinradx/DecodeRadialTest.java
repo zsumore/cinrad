@@ -85,14 +85,14 @@ public class DecodeRadialTest {
 		// int[] valueIndices = { 2, 3, 4, 7, 8, 9, 10, 13, 14,15 };
 		// filter.setMinValue(15);
 		// filter.setMaxValue();
-		decode.setDecodeHint(IRadialDecoder.RADIAL_MIN_VALUE, 20);
+		decode.setDecodeHint(DecodeRadial.MIN_VALUE, 20);
 
 		// 是否减少多边形，如果设为true，会把颜色等级相同而且相邻的多边形合并为一个新的多边形，但是速度会变慢
-		decode.setDecodeHint(IRadialDecoder.REDUCE_POLYGONS, true);
+		decode.setDecodeHint(DecodeRadial.REDUCE_POLYGONS, true);
 		boolean colorMode = true;
-		decode.setDecodeHint(IRadialDecoder.COLOR_MODE, colorMode);
+		decode.setDecodeHint(DecodeRadial.COLOR_MODE, colorMode);
 
-		decode.setDecodeHint(IRadialDecoder.MULTIPOLYGON_MODE, true);
+		decode.setDecodeHint(DecodeRadial.MULTIPOLYGON_MODE, true);
 		// decode.setDecodeHint("reducePolygons", true);
 		// System.out.println(System.currentTimeMillis());
 		decode.decodeData(true);

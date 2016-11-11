@@ -66,7 +66,7 @@ public class DecodeRadialTest {
 
 		decodeRadial.decodeData(true);
 
-		System.out.println(decodeRadial.getFeatures().size());
+		System.out.println(decodeRadial.getPlaneFeatures().size());
 
 		fail("Not yet implemented");
 	}
@@ -109,7 +109,7 @@ public class DecodeRadialTest {
 				MQProjections.getInstance().getWGS84CoordinateSystem()));
 
 		Color[] colors = CinradColorFactory.getColors(CindarProducts.BASE_REFLECTIVITY_19);
-		context.addLayer(new FeatureLayer(decode.getFeatures(), createPolygonStyle(colors, colorMode)));
+		context.addLayer(new FeatureLayer(decode.getPlaneFeatures(), createPolygonStyle(colors, colorMode)));
 		// context.addLayer(decode.getFeatures(), createPolygonStyle(colors));
 
 		GTRenderer draw = new StreamingRenderer();
@@ -122,7 +122,7 @@ public class DecodeRadialTest {
 		mapFrame.getMapPane().reset();
 		mapFrame.setVisible(true);
 
-		System.out.println(decode.getFeatures().size());
+		System.out.println(decode.getPlaneFeatures().size());
 
 	}
 

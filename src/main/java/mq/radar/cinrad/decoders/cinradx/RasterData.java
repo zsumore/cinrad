@@ -37,7 +37,7 @@ public class RasterData implements ICinradXBuilder {
 				} else {
 					code = file.readUnsignedShort();
 				}
-				float value = (code - this.rasterHeader.getOffset())*1.00f / this.rasterHeader.getScale();
+				float value = (code - this.rasterHeader.getOffset()) * 1.00f / this.rasterHeader.getScale();
 
 				if (value > 0) {
 					dataValueArray.put(k, value);
@@ -47,6 +47,19 @@ public class RasterData implements ICinradXBuilder {
 
 		}
 
+	}
+
+	public RasterHeader getRasterHeader() {
+		return rasterHeader;
+	}
+
+	public Map<Long, Float> getDataValueArray() {
+		return dataValueArray;
+	}
+
+	@Override
+	public String toString() {
+		return "RasterData [rasterHeader=" + rasterHeader + ", dataValueArray=" + dataValueArray + "]";
 	}
 
 }

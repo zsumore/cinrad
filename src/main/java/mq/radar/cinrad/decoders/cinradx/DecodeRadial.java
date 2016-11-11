@@ -6,13 +6,11 @@ import java.util.Set;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.geotools.data.shapefile.shp.JTSUtilities;
-import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +35,7 @@ public class DecodeRadial extends BaseDecoder {
 
 	private RadialDataBlock radialDataBlock;
 
-	private DefaultFeatureCollection features = null;
-
-	private int geoIndex;
+	private int geoIndex = 0;
 
 	public DecodeRadial(IDecodeCinradXHeader decodeHeader) throws ConfigurationException {
 		super(decodeHeader);
@@ -48,14 +44,7 @@ public class DecodeRadial extends BaseDecoder {
 
 	@Override
 	public void decodeData(boolean autoClosed) throws DecodeException, IOException, TransformException {
-
-		try {
-			initDecodeHints();
-		} catch (FactoryException e) {
-			logger.error(e.getMessage());
-
-			return;
-		}
+		super.decodeData(autoClosed);
 
 		polyMultimap = ArrayListMultimap.create();
 
@@ -77,9 +66,10 @@ public class DecodeRadial extends BaseDecoder {
 		// Reset index counter
 		geoIndex = 0;
 
-		if (features == null)
-			features = new DefaultFeatureCollection();
-		features.clear();
+		if (getPlaneFeatures() == null) {
+			planeFeatures = new DefaultFeatureCollection();
+		}
+		planeFeatures.clear();
 
 		double minA = filter.getMinAzimuth();
 		double maxA = filter.getMaxAzimuth();
@@ -224,7 +214,7 @@ public class DecodeRadial extends BaseDecoder {
 								SimpleFeature feature = SimpleFeatureBuilder.build(schema,
 										new Object[] { union, color, value }, new Integer(geoIndex++).toString());
 
-								features.add(feature);
+								planeFeatures.add(feature);
 							} else {
 
 								MultiPolygon multiPolygon = (MultiPolygon) union;
@@ -235,7 +225,7 @@ public class DecodeRadial extends BaseDecoder {
 											new Object[] { (Geometry) multiPolygon.getGeometryN(j), color, value },
 											new Integer(geoIndex++).toString());
 
-									features.add(feature);
+									planeFeatures.add(feature);
 
 									// logger.debug(feature.toString());
 
@@ -250,7 +240,7 @@ public class DecodeRadial extends BaseDecoder {
 										new Object[] { (Geometry) new MultiPolygon(pa, geoFactory), color, value },
 										new Integer(geoIndex++).toString());
 
-								features.add(feature);
+								planeFeatures.add(feature);
 
 							} else {
 
@@ -259,7 +249,7 @@ public class DecodeRadial extends BaseDecoder {
 										new Object[] { (Geometry) union, color, value },
 										new Integer(geoIndex++).toString());
 
-								features.add(feature);
+								planeFeatures.add(feature);
 							}
 
 							// logger.debug(feature.toString());
@@ -276,7 +266,7 @@ public class DecodeRadial extends BaseDecoder {
 						SimpleFeature feature = SimpleFeatureBuilder.build(schema, new Object[] { poly, color, value },
 								new Integer(geoIndex++).toString());
 
-						features.add(feature);
+						planeFeatures.add(feature);
 
 						// logger.debug(feature.toString());
 					}
@@ -317,16 +307,6 @@ public class DecodeRadial extends BaseDecoder {
 		return false;
 	}
 
-	public SimpleFeatureCollection getFeatures() {
-
-		return features;
-	}
-
-	public MathTransform getMathTransform() {
-
-		return cinradTransform;
-	}
-
 	public RadialDataBlock getRadialDataBlock() {
 
 		return radialDataBlock;
@@ -334,13 +314,12 @@ public class DecodeRadial extends BaseDecoder {
 
 	@Override
 	public void close() {
+		super.close();
 
 		if (null != polyMultimap) {
 			polyMultimap.clear();
 		}
-		if (null != features) {
-			features.clear();
-		}
+
 		radialDataBlock = null;
 
 	}

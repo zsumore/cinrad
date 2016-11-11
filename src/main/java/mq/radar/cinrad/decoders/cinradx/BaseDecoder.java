@@ -6,12 +6,16 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.referencing.CRS;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -22,6 +26,8 @@ import mq.radar.cinrad.decoders.DecodeException;
 import mq.radar.cinrad.decoders.DecodeHintNotSupportedException;
 
 public class BaseDecoder implements IBaseDecoder {
+
+	private final Logger logger = LoggerFactory.getLogger(BaseDecoder.class);
 
 	protected IDecodeCinradXHeader decodeCinradXHeader;
 
@@ -41,6 +47,12 @@ public class BaseDecoder implements IBaseDecoder {
 
 	protected double geometrySimplify = 0.000001;
 
+	protected DefaultFeatureCollection planeFeatures;
+
+	protected DefaultFeatureCollection pointFeatures;
+
+	protected DefaultFeatureCollection lineFeatures;
+
 	public BaseDecoder(IDecodeCinradXHeader decodeHeader) throws ConfigurationException {
 
 		this.decodeCinradXHeader = decodeHeader;
@@ -58,6 +70,13 @@ public class BaseDecoder implements IBaseDecoder {
 	@Override
 	public void decodeData(boolean autoClosed) throws DecodeException, IOException, TransformException {
 		// TODO Auto-generated method stub
+		try {
+			initDecodeHints();
+		} catch (FactoryException e) {
+			logger.error(e.getMessage());
+
+			return;
+		}
 
 	}
 
@@ -82,7 +101,21 @@ public class BaseDecoder implements IBaseDecoder {
 
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
+		if (null != this.decodeCinradXHeader) {
+			this.decodeCinradXHeader.close();
+		}
+
+		if (null != planeFeatures) {
+			planeFeatures.clear();
+		}
+
+		if (null != pointFeatures) {
+			pointFeatures.clear();
+		}
+
+		if (null != lineFeatures) {
+			lineFeatures.clear();
+		}
 
 	}
 
@@ -124,6 +157,30 @@ public class BaseDecoder implements IBaseDecoder {
 		if (value >= filter.getMinValue() && value <= filter.getMaxValue())
 			return true;
 		return false;
+	}
+
+	@Override
+	public SimpleFeatureCollection getPlaneFeatures() {
+
+		return this.planeFeatures;
+	}
+
+	@Override
+	public SimpleFeatureCollection getPointFeatures() {
+
+		return this.pointFeatures;
+	}
+
+	@Override
+	public SimpleFeatureCollection getLineFeatures() {
+
+		return this.lineFeatures;
+	}
+
+	@Override
+	public IDecodeCinradXHeader getIDecodeCinradXHeader() {
+
+		return this.decodeCinradXHeader;
 	}
 
 }
